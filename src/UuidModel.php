@@ -1150,6 +1150,12 @@ class UuidModel
 			return $this->builder;
 		}
 
+		// We have to ensure that uuidVersion is set correctly
+		if (! in_array($this->uuidVersion, ['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6']))
+		{
+			throw UuidModelException::forIncorrectUuidVersion();
+		}
+
 		// We're going to force a primary key to exist
 		// so we don't have overly convoluted code,
 		// and future features are likely to require them.
