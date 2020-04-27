@@ -1,6 +1,5 @@
 <?php
 
-use Ramsey\Uuid\Uuid;
 namespace Michalsn\Uuid;
 
 use Closure;
@@ -15,12 +14,14 @@ use CodeIgniter\Pager\Pager;
 use CodeIgniter\Validation\ValidationInterface;
 use Config\Database;
 use Michalsn\Uuid\Exceptions\UuidModelException;
+use Ramsey\Uuid\Uuid;
 use ReflectionClass;
 use ReflectionProperty;
 use stdClass;
 
 /**
- * Uuid Class Model is based on a Model shipped with CodeIgniter
+ * Uuid Class Model is based on a Model shipped with CodeIgniter.
+ * This class is tightly coupled with Ramsey's Uuid class.
  */
 class UuidModel
 {
@@ -36,7 +37,7 @@ class UuidModel
 	 *
 	 * @param boolean
 	 */
-	protected $uuidUseBytes = false;
+	protected $uuidUseBytes = true;
 
 	/**
 	 * UUID fields.
