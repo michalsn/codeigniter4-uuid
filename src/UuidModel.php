@@ -605,9 +605,9 @@ class UuidModel
 	/**
 	 * Returns last insert ID or 0.
 	 *
-	 * @return integer
+	 * @return integer|string
 	 */
-	public function getInsertID(): int
+	public function getInsertID()
 	{
 		return $this->insertID;
 	}
