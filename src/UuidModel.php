@@ -20,7 +20,7 @@ use ReflectionProperty;
 use stdClass;
 
 /**
- * Uuid Class Model is based on a Model shipped with CodeIgniter.
+ * The Uuid class Model is based on a Model shipped with CodeIgniter.
  * This class is tightly coupled with Ramsey's Uuid class.
  */
 class UuidModel
@@ -42,9 +42,16 @@ class UuidModel
 	/**
 	 * UUID fields.
 	 *
-	 * @param string
+	 * @param array
 	 */
 	protected $uuidFields = ['id'];
+
+	/**
+	 * UUID temp object array.
+	 *
+	 * @param array
+	 */
+	protected $uuidTempData = [];
 
 	/**
 	 * Pager instance.
