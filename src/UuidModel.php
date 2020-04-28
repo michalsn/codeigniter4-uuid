@@ -27,6 +27,7 @@ class UuidModel
 {
 	/**
 	 * Used UUID version.
+	 * Available options: uuid1, uuid2, uuid3, uuid4, uuid5, uuid6.
 	 *
 	 * @param string
 	 */
