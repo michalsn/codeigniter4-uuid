@@ -1172,6 +1172,33 @@ class UuidModel
 			}
 		}
 
+		if (is_array($set))
+		{
+			foreach ($set as &$row)
+			{
+				// Must be called first so we don't
+				// strip out updated_at values.
+				$row = $this->doProtectFields($row, true);
+
+				if ($this->useTimestamps && ! empty($this->updatedField) && ! array_key_exists($this->updatedField, $row))
+				{
+					$row[$this->updatedField] = $this->setDate();
+				}
+
+				// Convert UUID fields if needed
+				if (! empty($this->uuidFields) && $this->uuidUseBytes === true)
+				{
+					foreach ($this->uuidFields as $field)
+					{
+						if (! empty($row[$field]))
+						{
+							$row[$field] = (Uuid::fromString($row[$field]))->getBytes();
+						}
+					}
+				}
+			}
+		}
+
 		return $this->builder()->updateBatch($set, $index, $batchSize, $returnSQL);
 	}
 
@@ -1502,11 +1529,12 @@ class UuidModel
 	 * vulnerabilities.
 	 *
 	 * @param array $data
+	 * @param bool  $addPrimaryKey
 	 *
 	 * @return array
 	 * @throws \CodeIgniter\Database\Exceptions\DataException
 	 */
-	protected function doProtectFields(array $data): array
+	protected function doProtectFields(array $data, bool $addPrimaryKey = false): array
 	{
 		if ($this->protectFields === false)
 		{
@@ -1518,16 +1546,28 @@ class UuidModel
 			throw DataException::forInvalidAllowedFields(get_class($this));
 		}
 
+		$tempAllowedFields = $this->allowedFields;
+
+		if ($addPrimaryKey === true)
+		{
+			if (! in_array($this->primaryKey, $tempAllowedFields))
+			{
+				$tempAllowedFields[] = $this->primaryKey;
+			}
+		}
+
 		if (is_array($data) && count($data))
 		{
 			foreach ($data as $key => $val)
 			{
-				if (! in_array($key, $this->allowedFields))
+				if (! in_array($key, $tempAllowedFields))
 				{
 					unset($data[$key]);
 				}
 			}
 		}
+
+		$tempAllowedFields = null;
 
 		return $data;
 	}
