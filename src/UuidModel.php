@@ -54,6 +54,8 @@ class UuidModel
 	 */
 	protected $uuidTempData = [];
 
+	//--------------------------------------------------------------------
+
 	/**
 	 * Pager instance.
 	 * Populated after calling $this->paginate()
@@ -334,6 +336,170 @@ class UuidModel
 
 	//--------------------------------------------------------------------
 	//--------------------------------------------------------------------
+	// UUID HELPER METHODS
+	//--------------------------------------------------------------------
+
+	/**
+	 * Prepare UUID results - transform if needed.
+	 *
+	 * @param array|object $row        Row
+	 * @param string       $returnType Return type
+	 *
+	 * @return void;
+	 */
+	protected function convertUuidFieldsToStrings($results, string $returnType = 'array')
+	{
+		if (empty($this->uuidFields) || $this->uuidUseBytes === false)
+		{
+			return $results;
+		}
+
+		if (is_object($results) || empty($results[0]))//! is_array($results))
+		{
+			return $this->convertUuidFieldsToString($results, $returnType);
+		}
+
+		foreach ($results as &$row)
+		{
+			$row = $this->convertUuidFieldsToString($row, $returnType);
+		}
+
+		return $results;
+	}
+
+	//--------------------------------------------------------------------
+
+	/**
+	 * Prepare UUID row - transform if needed.
+	 *
+	 * @param array|object $row        Row
+	 * @param string       $returnType Return type
+	 *
+	 * @return void;
+	 */
+	protected function convertUuidFieldsToString($row, string $returnType = 'array')
+	{
+		if (empty($this->uuidFields) || $this->uuidUseBytes === false)
+		{
+			return $row;
+		}
+
+		foreach ($this->uuidFields as $field)
+		{
+			if ($returnType === 'array')
+			{
+				if (empty($row[$field]))
+				{
+					continue;
+				}
+
+				$row[$field] = (Uuid::fromBytes($row[$field]))->toString();
+			}
+			else
+			{
+				if (empty($row->{$field}))
+				{
+					continue;
+				}
+
+				$row->{$field} = (Uuid::fromBytes($row->{$field}))->toString();
+			}
+		}
+
+		return $row;
+	}
+
+	//--------------------------------------------------------------------
+
+	/**
+	 * Convert UUID primary key to bytes if needed
+	 *
+	 * @param array|string $key Key or array of keys to convert
+	 *
+	 * @return array|string
+	 */
+	protected function convertUuidPrimaryKeyToBytes($key = null)
+	{
+		if (! in_array($this->primaryKey, $this->uuidFields) || $this->uuidUseBytes === false)
+		{
+			return $key;
+		}
+
+		if (is_array($key))
+		{
+			foreach ($key as &$val)
+			{
+				$val = (Uuid::fromString($val))->getBytes();
+			}
+		}
+		elseif (! empty($key))
+		{
+			$key = (Uuid::fromString($key))->getBytes();
+		}
+
+		return $key;
+	}
+
+	//--------------------------------------------------------------------
+
+	/**
+	 * Convert UUID to bytes if needed
+	 *
+	 * @param array $results Result array to convert
+	 *
+	 * @return array|string|null
+	 */
+	protected function convertUuidFieldsToBytes($results)
+	{
+		if (empty($this->uuidFields) || $this->uuidUseBytes === false)
+		{
+			return $results;
+		}
+
+		if (empty($results[0]))
+		{
+			return $this->convertUuidFieldsToByte($results);
+		}
+
+		foreach ($results as &$row)
+		{
+			$row = $this->convertUuidFieldsToByte($row);
+		}
+
+		return $results;
+	}
+
+	//--------------------------------------------------------------------
+
+	/**
+	 * Convert UUID to bytes if needed
+	 *
+	 * @param array $row Row array to convert
+	 *
+	 * @return array|string|null
+	 */
+	protected function convertUuidFieldsToByte($row)
+	{
+		if (empty($this->uuidFields) || $this->uuidUseBytes === false)
+		{
+			return $row;
+		}
+
+		foreach ($this->uuidFields as $field)
+		{
+			if (empty($row[$field]))
+			{
+				continue;
+			}
+
+			$row[$field] = (Uuid::fromString($row[$field]))->getBytes();
+		}
+
+		return $row;
+	}
+
+	//--------------------------------------------------------------------
+	//--------------------------------------------------------------------
 	// CRUD & FINDERS
 	//--------------------------------------------------------------------
 
@@ -354,13 +520,16 @@ class UuidModel
 			$builder->where($this->table . '.' . $this->deletedField, null);
 		}
 
+		// Convert UUID fields to byte if needed
+		$id = $this->convertUuidPrimaryKeyToBytes($id);
+
 		if (is_array($id))
 		{
 			$row = $builder->whereIn($this->table . '.' . $this->primaryKey, $id)
 					->get();
 			$row = $row->getResult($this->tempReturnType);
 		}
-		elseif (is_numeric($id) || is_string($id))
+		elseif (! empty($id))
 		{
 			$row = $builder->where($this->table . '.' . $this->primaryKey, $id)
 					->get();
@@ -373,6 +542,9 @@ class UuidModel
 
 			$row = $row->getResult($this->tempReturnType);
 		}
+
+		// Convert UUID fields from byte if needed
+		$row = $this->convertUuidFieldsToStrings($row, $this->tempReturnType);
 
 		$eventData = $this->trigger('afterFind', ['id' => $id, 'data' => $row]);
 
@@ -403,6 +575,12 @@ class UuidModel
 						  ->asArray()
 						  ->find();
 
+		// Convert UUID fields from byte if needed
+		if (in_array($columnName, $this->uuidFields) && $this->uuidUseBytes === true)
+		{
+			$resultSet = $this->convertUuidFieldsToStrings($resultSet, 'array');
+		}
+
 		return (! empty($resultSet)) ? array_column($resultSet, $columnName) : null;
 	}
 
@@ -431,6 +609,9 @@ class UuidModel
 
 		$row = $row->getResult($this->tempReturnType);
 
+		// Convert UUID fields from byte if needed
+		$row = $this->convertUuidFieldsToStrings($row, $this->tempReturnType);
+
 		$eventData = $this->trigger('afterFind', ['data' => $row, 'limit' => $limit, 'offset' => $offset]);
 
 		$this->tempReturnType     = $this->returnType;
@@ -456,9 +637,20 @@ class UuidModel
 			$builder->where($this->table . '.' . $this->deletedField, null);
 		}
 
+		// Search when UUID6 is used as primary key
+		if (empty($builder->QBOrderBy) && in_array($this->primaryKey, $this->uuidFields) && $this->uuidUseBytes === false && $this->uuidVersion === 'uuid6')	
+		{
+			$builder->orderBy($this->table . '.' . $this->primaryKey, 'asc');
+		}
+		// Search when other UUID is used as a primary key
+		elseif (empty($builder->QBOrderBy) && in_array($this->primaryKey, $this->uuidFields) && $this->useTimestamps === true)	
+		{
+			$builder->orderBy($this->table . '.' . $this->createdField, 'asc');
+		}
+
 		// Some databases, like PostgreSQL, need order
 		// information to consistently return correct results.
-		if (empty($builder->QBOrderBy) && ! empty($this->primaryKey))
+		elseif (empty($builder->QBOrderBy) && ! empty($this->primaryKey))
 		{
 			$builder->orderBy($this->table . '.' . $this->primaryKey, 'asc');
 		}
@@ -467,6 +659,9 @@ class UuidModel
 				->get();
 
 		$row = $row->getFirstRow($this->tempReturnType);
+
+		// Convert UUID fields from byte if needed
+		$row = $this->convertUuidFieldsToStrings($row, $this->tempReturnType);
 
 		$eventData = $this->trigger('afterFind', ['data' => $row]);
 
@@ -644,6 +839,7 @@ class UuidModel
 		$escape = null;
 
 		$this->insertID = 0;
+		$this->uuidTempData = [];
 
 		if (empty($data))
 		{
@@ -701,6 +897,33 @@ class UuidModel
 
 		$eventData = $this->trigger('beforeInsert', ['data' => $data]);
 
+		if (! empty($this->uuidFields))
+		{
+			foreach ($this->uuidFields as $field)
+			{
+				if ($field === $this->primaryKey)
+				{
+					$this->uuidTempData[$field] = Uuid::{$this->uuidVersion}();
+
+					if ($this->uuidUseBytes === true)
+					{
+						$eventData['data'][$field] = $this->uuidTempData[$field]->getBytes();
+					}
+					else
+					{
+						$eventData['data'][$field] = $this->uuidTempData[$field]->toString();
+					}
+				}
+				else
+				{
+					if ($this->uuidUseBytes === true && ! empty($eventData['data'][$field]))
+					{
+						$eventData['data'][$field] = (Uuid::fromString($eventData['data'][$field]))->getBytes();
+					}
+				}
+			}
+		}
+
 		// Must use the set() method to ensure objects get converted to arrays
 		$result = $this->builder()
 				->set($eventData['data'], '', $escape)
@@ -709,8 +932,19 @@ class UuidModel
 		// If insertion succeeded then save the insert ID
 		if ($result)
 		{
-			$this->insertID = $this->db->insertID();
+			if (in_array($this->primaryKey, $this->uuidFields))
+			{
+				$this->insertID = $this->uuidTempData[$this->primaryKey]->toString();
+			}
+			else
+			{
+				$this->insertID = $this->db->insertID();
+			}
 		}
+
+		// Cleanup data before event trigger
+		$eventData['data'] = $this->convertUuidFieldsToStrings($eventData['data'], 'array');
+		unset($eventData['data'][$this->primaryKey]);
 
 		// Trigger afterInsert events with the inserted data and new ID
 		$this->trigger('afterInsert', ['id' => $this->insertID, 'data' => $eventData['data'], 'result' => $result]);
@@ -833,13 +1067,30 @@ class UuidModel
 
 		if ($id)
 		{
+			// Convert UUID pk to byte if needed
+			$id = $this->convertUuidPrimaryKeyToBytes($id);
 			$builder = $builder->whereIn($this->table . '.' . $this->primaryKey, $id);
+		}
+
+		// Convert UUID fields if needed
+		if (! empty($this->uuidFields) && $this->uuidUseBytes === true)
+		{
+			foreach ($this->uuidFields as $field)
+			{
+				if (! empty($eventData['data'][$field]))
+				{
+					$eventData['data'][$field] = (Uuid::fromString($eventData['data'][$field]))->getBytes();
+				}
+			}
 		}
 
 		// Must use the set() method to ensure objects get converted to arrays
 		$result = $builder
 				->set($eventData['data'], '', $escape)
 				->update();
+
+		// Cleanup data before event trigger
+		$eventData['data'] = $this->convertUuidFieldsToStrings($eventData['data'], 'array');
 
 		$this->trigger('afterUpdate', ['id' => $id, 'data' => $eventData['data'], 'result' => $result]);
 
@@ -899,6 +1150,8 @@ class UuidModel
 		$builder = $this->builder();
 		if (! empty($id))
 		{
+			// Convert UUID pk to byte if needed
+			$id = $this->convertUuidPrimaryKeyToBytes($id);
 			$builder = $builder->whereIn($this->primaryKey, $id);
 		}
 
@@ -1013,6 +1266,9 @@ class UuidModel
 			}
 		}
 
+		// Convert to bytes if needed
+		$data = $this->convertUuidFieldsToBytes($data);
+
 		return $this->builder()->replace($data, $returnSQL);
 	}
 
@@ -1089,6 +1345,9 @@ class UuidModel
 			{
 				continue;
 			}
+
+			// Convert to bytes if needed
+			$rows = $this->convertUuidFieldsToStrings($rows);
 
 			foreach ($rows as $row)
 			{
