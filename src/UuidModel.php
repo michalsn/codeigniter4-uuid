@@ -985,6 +985,53 @@ class UuidModel
 			}
 		}
 
+		if (is_array($set))
+		{
+			foreach ($set as &$row)
+			{
+				$row = $this->doProtectFields($row);
+
+				// Set created_at and updated_at with same time
+				$date = $this->setDate();
+
+				if ($this->useTimestamps && ! empty($this->createdField) && ! array_key_exists($this->createdField, $row))
+				{
+					$row[$this->createdField] = $date;
+				}
+
+				if ($this->useTimestamps && ! empty($this->updatedField) && ! array_key_exists($this->updatedField, $row))
+				{
+					$row[$this->updatedField] = $date;
+				}
+
+				// Add primary key and convert to bytes if needed
+				if (! empty($this->uuidFields))
+				{
+					foreach ($this->uuidFields as $field)
+					{
+						if ($field === $this->primaryKey)
+						{
+							if ($this->uuidUseBytes === true)
+							{
+								$row[$field] = (Uuid::{$this->uuidVersion}())->getBytes();
+							}
+							else
+							{
+								$row[$field] = (Uuid::{$this->uuidVersion}())->toString();
+							}
+						}
+						else
+						{
+							if ($this->uuidUseBytes === true && ! empty($row[$field]))
+							{
+								$row[$field] = (Uuid::fromString($row[$field]))->getBytes();
+							}
+						}
+					}
+				}
+			}
+		}
+
 		return $this->builder()->insertBatch($set, $escape, $batchSize, $testing);
 	}
 
