@@ -29,7 +29,7 @@ class UuidEntity extends Entity
 		if (! empty($this->uuids))
 		{
 			// Load Uuid service
-			$uuid = service('Uuid');
+			$uuidObj = service('Uuid');
 
 			// Loop through the UUID array fields
 			foreach ($this->uuids as $uuid)
@@ -37,7 +37,7 @@ class UuidEntity extends Entity
 				// Check if field is in byte format
 				if (mb_strlen($this->attributes[$uuid], 'UTF-8') < strlen($this->attributes[$uuid]))
 				{
-					$this->original[$uuid] = ($uuid->fromBytes($this->attributes[$uuid]))->toString();
+					$this->original[$uuid] = ($uuidObj->fromBytes($this->attributes[$uuid]))->toString();
 				}
 			}
 		}
