@@ -3,7 +3,7 @@
 namespace Michalsn\UuidModel;
 
 use CodeIgniter\Entity;
-use Ramsey\Uuid\Uuid;
+use Michalsn\UuidModel\Uuid;
 
 /**
  * Entity encapsulation, for use with Michalsn\UuidModel\UuidModel
@@ -26,13 +26,19 @@ class UuidEntity extends Entity
 	{
 		$this->original = $this->attributes;
 
-		// Loop through the UUID array fields
-		foreach ($this->uuids as $uuid)
+		if (! empty($this->uuids))
 		{
-			// Check if field is in byte format
-			if (mb_strlen($this->attributes[$uuid], 'UTF-8') < strlen($this->attributes[$uuid]))
+			// Load Uuid service
+			$uuid = service('Uuid');
+
+			// Loop through the UUID array fields
+			foreach ($this->uuids as $uuid)
 			{
-				$this->original[$uuid] = (Uuid::fromBytes($this->attributes[$uuid]))->toString();
+				// Check if field is in byte format
+				if (mb_strlen($this->attributes[$uuid], 'UTF-8') < strlen($this->attributes[$uuid]))
+				{
+					$this->original[$uuid] = ($uuid->fromBytes($this->attributes[$uuid]))->toString();
+				}
 			}
 		}
 

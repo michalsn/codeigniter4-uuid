@@ -14,7 +14,7 @@ use CodeIgniter\Pager\Pager;
 use CodeIgniter\Validation\ValidationInterface;
 use Config\Database;
 use Michalsn\UuidModel\Exceptions\UuidModelException;
-use Ramsey\Uuid\Uuid;
+use Michalsn\UuidModel\Uuid;
 use ReflectionClass;
 use ReflectionProperty;
 use stdClass;
@@ -26,31 +26,38 @@ use stdClass;
 class UuidModel
 {
 	/**
+	 * UUID object.
+	 *
+	 * @var Uuid
+	 */
+	protected $uuid;
+
+	/**
 	 * Used UUID version.
 	 * Available options: uuid1, uuid2, uuid3, uuid4, uuid5, uuid6.
 	 *
-	 * @param string
+	 * @var string
 	 */
 	protected $uuidVersion = 'uuid1';
 
 	/**
 	 * Store UUID in byte format.
 	 *
-	 * @param boolean
+	 * @var boolean
 	 */
 	protected $uuidUseBytes = true;
 
 	/**
 	 * UUID fields.
 	 *
-	 * @param array
+	 * @var array
 	 */
 	protected $uuidFields = ['id'];
 
 	/**
 	 * UUID temp object array.
 	 *
-	 * @param array
+	 * @var array
 	 */
 	protected $uuidTempData = [];
 
@@ -314,6 +321,9 @@ class UuidModel
 			throw UuidModelException::forIncorrectUuidVersion($this->uuidVersion);
 		}
 
+		// Load Uuid service
+		$this->uuid = service('uuid');
+
 		if ($db instanceof ConnectionInterface)
 		{
 			$this->db = & $db;
@@ -356,12 +366,12 @@ class UuidModel
 
 		if (is_object($results) || empty($results[0]))//! is_array($results))
 		{
-			return $this->convertUuidFieldsToString($results, $returnType);
+			return $this->convertUuidFieldToString($results, $returnType);
 		}
 
 		foreach ($results as &$row)
 		{
-			$row = $this->convertUuidFieldsToString($row, $returnType);
+			$row = $this->convertUuidFieldToString($row, $returnType);
 		}
 
 		return $results;
@@ -377,7 +387,7 @@ class UuidModel
 	 *
 	 * @return void;
 	 */
-	protected function convertUuidFieldsToString($row, string $returnType = 'array')
+	protected function convertUuidFieldToString($row, string $returnType = 'array')
 	{
 		if (empty($this->uuidFields) || $this->uuidUseBytes === false)
 		{
@@ -385,7 +395,7 @@ class UuidModel
 		}
 
 		foreach ($this->uuidFields as $field)
-		{
+		{		
 			if ($returnType === 'array')
 			{
 				if (empty($row[$field]))
@@ -393,7 +403,7 @@ class UuidModel
 					continue;
 				}
 
-				$row[$field] = (Uuid::fromBytes($row[$field]))->toString();
+				$row[$field] = ($this->uuid->fromBytes($row[$field]))->toString();
 			}
 			else
 			{
@@ -402,7 +412,7 @@ class UuidModel
 					continue;
 				}
 
-				$row->{$field} = (Uuid::fromBytes($row->{$field}))->toString();
+				$row->{$field} = ($this->uuid->fromBytes($row->{$field}))->toString();
 			}
 		}
 
@@ -429,12 +439,12 @@ class UuidModel
 		{
 			foreach ($key as &$val)
 			{
-				$val = (Uuid::fromString($val))->getBytes();
+				$val = ($this->uuid->fromString($val))->getBytes();
 			}
 		}
 		elseif (! empty($key))
 		{
-			$key = (Uuid::fromString($key))->getBytes();
+			$key = ($this->uuid->fromString($key))->getBytes();
 		}
 
 		return $key;
@@ -458,12 +468,12 @@ class UuidModel
 
 		if (empty($results[0]))
 		{
-			return $this->convertUuidFieldsToByte($results);
+			return $this->convertUuidFieldToByte($results);
 		}
 
 		foreach ($results as &$row)
 		{
-			$row = $this->convertUuidFieldsToByte($row);
+			$row = $this->convertUuidFieldToByte($row);
 		}
 
 		return $results;
@@ -478,7 +488,7 @@ class UuidModel
 	 *
 	 * @return array|string|null
 	 */
-	protected function convertUuidFieldsToByte($row)
+	protected function convertUuidFieldToByte($row)
 	{
 		if (empty($this->uuidFields) || $this->uuidUseBytes === false)
 		{
@@ -492,7 +502,7 @@ class UuidModel
 				continue;
 			}
 
-			$row[$field] = (Uuid::fromString($row[$field]))->getBytes();
+			$row[$field] = ($this->uuid->fromString($row[$field]))->getBytes();
 		}
 
 		return $row;
@@ -910,7 +920,7 @@ class UuidModel
 			{
 				if ($field === $this->primaryKey)
 				{
-					$this->uuidTempData[$field] = Uuid::{$this->uuidVersion}();
+					$this->uuidTempData[$field] = $this->uuid->{$this->uuidVersion}();
 
 					if ($this->uuidUseBytes === true)
 					{
@@ -925,7 +935,7 @@ class UuidModel
 				{
 					if ($this->uuidUseBytes === true && ! empty($eventData['data'][$field]))
 					{
-						$eventData['data'][$field] = (Uuid::fromString($eventData['data'][$field]))->getBytes();
+						$eventData['data'][$field] = ($this->uuid->fromString($eventData['data'][$field]))->getBytes();
 					}
 				}
 			}
@@ -1020,18 +1030,18 @@ class UuidModel
 						{
 							if ($this->uuidUseBytes === true)
 							{
-								$row[$field] = (Uuid::{$this->uuidVersion}())->getBytes();
+								$row[$field] = ($this->uuid->{$this->uuidVersion}())->getBytes();
 							}
 							else
 							{
-								$row[$field] = (Uuid::{$this->uuidVersion}())->toString();
+								$row[$field] = ($this->uuid->{$this->uuidVersion}())->toString();
 							}
 						}
 						else
 						{
 							if ($this->uuidUseBytes === true && ! empty($row[$field]))
 							{
-								$row[$field] = (Uuid::fromString($row[$field]))->getBytes();
+								$row[$field] = ($this->uuid->fromString($row[$field]))->getBytes();
 							}
 						}
 					}
@@ -1133,7 +1143,7 @@ class UuidModel
 			{
 				if (! empty($eventData['data'][$field]))
 				{
-					$eventData['data'][$field] = (Uuid::fromString($eventData['data'][$field]))->getBytes();
+					$eventData['data'][$field] = ($this->uuid->fromString($eventData['data'][$field]))->getBytes();
 				}
 			}
 		}
@@ -1199,7 +1209,7 @@ class UuidModel
 					{
 						if (! empty($row[$field]))
 						{
-							$row[$field] = (Uuid::fromString($row[$field]))->getBytes();
+							$row[$field] = ($this->uuid->fromString($row[$field]))->getBytes();
 						}
 					}
 				}
@@ -1348,7 +1358,7 @@ class UuidModel
 		}
 
 		// Convert to bytes if needed
-		$data = $this->convertUuidFieldsToBytes($data);
+		$data = $this->convertUuidFieldToBytes($data);
 
 		return $this->builder()->replace($data, $returnSQL);
 	}
