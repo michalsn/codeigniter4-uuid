@@ -636,6 +636,13 @@ class UuidModel
 		{
 			$builder->where($this->table . '.' . $this->deletedField, null);
 		}
+		else
+		{
+			if ($this->useSoftDeletes === true && empty($builder->QBGroupBy) && ! empty($this->primaryKey))
+			{
+				$builder->groupBy($this->table . '.' . $this->primaryKey);
+			}
+		}
 
 		// Search when UUID6 is used as primary key
 		if (empty($builder->QBOrderBy) && in_array($this->primaryKey, $this->uuidFields) && $this->uuidUseBytes === false && $this->uuidVersion === 'uuid6')	
@@ -650,7 +657,7 @@ class UuidModel
 
 		// Some databases, like PostgreSQL, need order
 		// information to consistently return correct results.
-		elseif (empty($builder->QBOrderBy) && ! empty($this->primaryKey))
+		elseif (! empty($builder->QBGroupBy) && empty($builder->QBOrderBy) && ! empty($this->primaryKey))
 		{
 			$builder->orderBy($this->table . '.' . $this->primaryKey, 'asc');
 		}
@@ -1763,10 +1770,6 @@ class UuidModel
 			return true;
 		}
 
-		// Replace any placeholders (i.e. {id}) in the rules with
-		// the value found in $data, if exists.
-		$rules = $this->fillPlaceholders($rules, $data);
-
 		$this->validation->setRules($rules, $this->validationMessages);
 		$valid = $this->validation->run($data, null, $this->DBGroup);
 
@@ -1818,6 +1821,10 @@ class UuidModel
 	 * The value of {id} would be replaced with the actual id in the form data:
 	 *
 	 *  'required|is_unique[users,email,id,13]'
+	 *
+	 * @codeCoverageIgnore
+	 *
+	 * @deprecated use fillPlaceholders($rules, $data) from Validation instead
 	 *
 	 * @param array $rules
 	 * @param array $data
