@@ -316,7 +316,7 @@ class UuidModel
 	public function __construct(ConnectionInterface &$db = null, ValidationInterface $validation = null)
 	{
 		// We have to ensure that uuidVersion is set correctly
-		if (! in_array($this->uuidVersion, ['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6']))
+		if (! in_array($this->uuidVersion, config('Uuid')->supportedVersions))
 		{
 			throw UuidModelException::forIncorrectUuidVersion($this->uuidVersion);
 		}

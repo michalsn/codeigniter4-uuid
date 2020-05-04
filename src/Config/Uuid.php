@@ -5,6 +5,12 @@ use CodeIgniter\Config\BaseConfig;
 class Uuid extends BaseConfig
 {
 	//--------------------------------------------------------------------
+	// Supported UUID versions
+	//--------------------------------------------------------------------
+
+	public $supportedVersions = ['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'];
+
+	//--------------------------------------------------------------------
 	// UUID version 1 optional config
 	//--------------------------------------------------------------------
 	// See more: https://uuid.ramsey.dev/en/latest/rfc4122/version1.html
