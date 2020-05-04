@@ -403,7 +403,7 @@ class UuidModel
 					continue;
 				}
 
-				$row[$field] = ($this->uuid->fromBytes($row[$field]))->toString();
+				$row[$field] = $this->uuid->fromBytes($row[$field])->toString();
 			}
 			else
 			{
@@ -412,7 +412,7 @@ class UuidModel
 					continue;
 				}
 
-				$row->{$field} = ($this->uuid->fromBytes($row->{$field}))->toString();
+				$row->{$field} = $this->uuid->fromBytes($row->{$field})->toString();
 			}
 		}
 
@@ -439,12 +439,12 @@ class UuidModel
 		{
 			foreach ($key as &$val)
 			{
-				$val = ($this->uuid->fromString($val))->getBytes();
+				$val = $this->uuid->fromString($val)->getBytes();
 			}
 		}
 		elseif (! empty($key))
 		{
-			$key = ($this->uuid->fromString($key))->getBytes();
+			$key = $this->uuid->fromString($key)->getBytes();
 		}
 
 		return $key;
@@ -502,7 +502,7 @@ class UuidModel
 				continue;
 			}
 
-			$row[$field] = ($this->uuid->fromString($row[$field]))->getBytes();
+			$row[$field] = $this->uuid->fromString($row[$field])->getBytes();
 		}
 
 		return $row;
