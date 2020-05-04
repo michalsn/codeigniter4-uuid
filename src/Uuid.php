@@ -2,6 +2,9 @@
 
 namespace Michalsn\Uuid;
 
+use DateTimeInterface;
+use Ramsey\Uuid\Type\Hexadecimal;
+use Ramsey\Uuid\Type\Integer as IntegerObject;
 use Ramsey\Uuid\Uuid as RamseyUuid;
 
 /**
@@ -31,12 +34,8 @@ class Uuid
 	/**
 	 * UUID Version 1
 	 *
-	 * @param Hexadecimal|int|string|null $nodeProvider A 48-bit number representing the
-     *     hardware address; this number may be represented as an integer or a
-     *     hexadecimal string
-     * @param int $clockSequence A 14-bit number used to help avoid duplicates that
-     *     could arise when the clock is set backwards in time or if the node ID
-     *     changes
+	 * @param Hexadecimal|int|string|null $nodeProvider  A 48-bit number representing the hardware address; this number may be represented as an integer or a hexadecimal string
+     * @param int                         $clockSequence A 14-bit number used to help avoid duplicates that could arise when the clock is set backwards in time or if the node ID changes
 	 *
 	 * @return Ramsey\Uuid\UuidInterface
 	 */
@@ -51,18 +50,10 @@ class Uuid
 	/**
 	 * UUID Version 2
 	 *
-	 * @param int $localDomain The local domain to use when generating bytes,
-     *     according to DCE Security
-     * @param IntegerObject|null $localIdentifier The local identifier for the
-     *     given domain; this may be a UID or GID on POSIX systems, if the local
-     *     domain is person or group, or it may be a site-defined identifier
-     *     if the local domain is org
-     * @param Hexadecimal|null $node A 48-bit number representing the hardware
-     *     address
-     * @param int|null $clockSeq A 14-bit number used to help avoid duplicates
-     *     that could arise when the clock is set backwards in time or if the
-     *     node ID changes (in a version 2 UUID, the lower 8 bits of this number
-     *     are replaced with the domain).
+	 * @param int                $localDomain     The local domain to use when generating bytes, according to DCE Security
+     * @param IntegerObject|null $localIdentifier The local identifier for the given domain; this may be a UID or GID on POSIX systems, if the local domain is person or group, or it may be a site-defined identifier if the local domain is org
+     * @param Hexadecimal|null   $node            A 48-bit number representing the hardware address
+     * @param int|null           $clockSequence   A 14-bit number used to help avoid duplicates that could arise when the clock is set backwards in time or if the node ID changes (in a version 2 UUID, the lower 8 bits of this number are replaced with the domain).
 	 *
 	 * @return Ramsey\Uuid\UuidInterface
 	 */
@@ -83,8 +74,8 @@ class Uuid
 	/**
 	 * UUID Version 3
 	 *
-	 * @param string|UuidInterface $ns The namespace (must be a valid UUID)
-     * @param string $name The name to use for creating a UUID
+	 * @param string|UuidInterface $ns   The namespace (must be a valid UUID)
+     * @param string               $name The name to use for creating a UUID
 	 *
 	 * @return Ramsey\Uuid\UuidInterface
 	 */
@@ -109,8 +100,8 @@ class Uuid
 	/**
 	 * UUID Version 5
 	 *
-	 * @param string|UuidInterface $ns The namespace (must be a valid UUID)
-     * @param string $name The name to use for creating a UUID
+	 * @param string|UuidInterface $ns   The namespace (must be a valid UUID)
+     * @param string               $name The name to use for creating a UUID
 	 *
 	 * @return Ramsey\Uuid\UuidInterface
 	 */
@@ -125,11 +116,8 @@ class Uuid
 	/**
 	 * UUID Version 6
 	 *
-	 * @param Hexadecimal|null $node A 48-bit number representing the hardware
-     *     address
-     * @param int $clockSeq A 14-bit number used to help avoid duplicates that
-     *     could arise when the clock is set backwards in time or if the node ID
-     *     changes
+	 * @param Hexadecimal|null $node          A 48-bit number representing the hardware address
+     * @param int              $clockSequence A 14-bit number used to help avoid duplicates that could arise when the clock is set backwards in time or if the node ID changes
 	 *
 	 * @return Ramsey\Uuid\UuidInterface
 	 */
