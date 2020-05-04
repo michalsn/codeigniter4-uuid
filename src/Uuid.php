@@ -1,6 +1,6 @@
 <?php
 
-namespace Michalsn\UuidModel;
+namespace Michalsn\Uuid;
 
 use Ramsey\Uuid\Uuid as RamseyUuid;
 

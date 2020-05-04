@@ -1,6 +1,6 @@
 <?php
 
-namespace Michalsn\UuidModel;
+namespace Michalsn\Uuid;
 
 use Closure;
 use CodeIgniter\Database\BaseBuilder;
@@ -13,8 +13,8 @@ use CodeIgniter\I18n\Time;
 use CodeIgniter\Pager\Pager;
 use CodeIgniter\Validation\ValidationInterface;
 use Config\Database;
-use Michalsn\UuidModel\Exceptions\UuidModelException;
-use Michalsn\UuidModel\Uuid;
+use Michalsn\Uuid\Exceptions\UuidModelException;
+use Michalsn\Uuid\Uuid;
 use ReflectionClass;
 use ReflectionProperty;
 use stdClass;

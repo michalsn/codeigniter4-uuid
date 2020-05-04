@@ -1,4 +1,4 @@
-<?php namespace Michalsn\UuidModel\Config;
+<?php namespace Michalsn\Uuid\Config;
 
 use CodeIgniter\Config\BaseConfig;
 

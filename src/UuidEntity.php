@@ -1,12 +1,11 @@
 <?php
 
-namespace Michalsn\UuidModel;
+namespace Michalsn\Uuid;
 
 use CodeIgniter\Entity;
-use Michalsn\UuidModel\Uuid;
 
 /**
- * Entity encapsulation, for use with Michalsn\UuidModel\UuidModel
+ * Entity encapsulation, for use with Michalsn\Uuid\UuidModel
  */
 class UuidEntity extends Entity
 {
@@ -29,7 +28,7 @@ class UuidEntity extends Entity
 		if (! empty($this->uuids))
 		{
 			// Load Uuid service
-			$uuidObj = service('Uuid');
+			$uuidObj = service('uuid');
 
 			// Loop through the UUID array fields
 			foreach ($this->uuids as $uuid)

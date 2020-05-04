@@ -1,7 +1,7 @@
-<?php namespace Michalsn\UuidModel\Config;
+<?php namespace Michalsn\Uuid\Config;
 
 use CodeIgniter\Config\BaseService;
-use Michalsn\UuidModel\Uuid;
+use Michalsn\Uuid\Uuid;
 
 class Services extends BaseService
 {

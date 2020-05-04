@@ -1,4 +1,4 @@
-<?php namespace Michalsn\UuidModel\Exceptions;
+<?php namespace Michalsn\Uuid\Exceptions;
 
 class UuidModelException extends \RuntimeException
 {
