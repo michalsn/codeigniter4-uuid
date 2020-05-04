@@ -25,7 +25,7 @@ class UuidEntity extends Entity
 	{
 		$this->original = $this->attributes;
 
-		if (! empty($this->uuids))
+		if (! empty($this->uuids) && ! empty($this->attributes))
 		{
 			// Load Uuid service
 			$uuidObj = service('uuid');
@@ -34,13 +34,57 @@ class UuidEntity extends Entity
 			foreach ($this->uuids as $uuid)
 			{
 				// Check if field is in byte format
-				if (mb_strlen($this->attributes[$uuid], 'UTF-8') < strlen($this->attributes[$uuid]))
+				if (isset($this->attributes[$uuid]) && ! ctype_print($this->attributes[$uuid]))
 				{
-					$this->original[$uuid] = ($uuidObj->fromBytes($this->attributes[$uuid]))->toString();
+					$this->original[$uuid] = $uuidObj->fromBytes($this->attributes[$uuid])->toString();
 				}
 			}
 		}
 
 		return $this;
 	}
+
+	/**
+	 * Takes an array of key/value pairs and sets them as
+	 * class properties, using any `setCamelCasedProperty()` methods
+	 * that may or may not exist.
+	 *
+	 * @param array $data
+	 *
+	 * @return \CodeIgniter\Entity
+	 */
+	public function fill(array $data = null)
+	{
+		if (! is_array($data))
+		{
+			return $this;
+		}
+
+		// Load Uuid service
+		$uuidObj = service('uuid');
+
+		foreach ($data as $key => $value)
+		{
+			if (! empty($this->uuids) && in_array($key, $this->uuids) && ! ctype_print($value))
+			{
+				$value = $uuidObj->fromBytes($value)->toString();
+			}
+
+			$key = $this->mapProperty($key);
+
+			$method = 'set' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key)));
+
+			if (method_exists($this, $method))
+			{
+				$this->$method($value);
+			}
+			else
+			{
+				$this->attributes[$key] = $value;
+			}
+		}
+
+		return $this;
+	}
+
 }
