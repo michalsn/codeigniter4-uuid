@@ -37,7 +37,7 @@ class Uuid
 	 * @param Hexadecimal|int|string|null $nodeProvider  A 48-bit number representing the hardware address; this number may be represented as an integer or a hexadecimal string
      * @param int                         $clockSequence A 14-bit number used to help avoid duplicates that could arise when the clock is set backwards in time or if the node ID changes
 	 *
-	 * @return Ramsey\Uuid\UuidInterface
+	 * @return \Ramsey\Uuid\UuidInterface
 	 */
 	public function uuid1($nodeProvider = null, ?int $clockSequence = null)
 	{
@@ -55,7 +55,7 @@ class Uuid
      * @param Hexadecimal|null   $node            A 48-bit number representing the hardware address
      * @param int|null           $clockSequence   A 14-bit number used to help avoid duplicates that could arise when the clock is set backwards in time or if the node ID changes (in a version 2 UUID, the lower 8 bits of this number are replaced with the domain).
 	 *
-	 * @return Ramsey\Uuid\UuidInterface
+	 * @return \Ramsey\Uuid\UuidInterface
 	 */
 	public function uuid2(
 		int $localDomain, 
@@ -77,12 +77,12 @@ class Uuid
 	 * @param string|UuidInterface $ns   The namespace (must be a valid UUID)
      * @param string               $name The name to use for creating a UUID
 	 *
-	 * @return Ramsey\Uuid\UuidInterface
+	 * @return \Ramsey\Uuid\UuidInterface
 	 */
 	public function uuid3($ns, string $name)
 	{
 		return RamseyUuid::uuid3(
-			$ns ??$this->config->uuid3['ns'],
+			$ns ?? $this->config->uuid3['ns'],
 			$name ?? $this->config->uuid3['name']
 		);
 	}
@@ -90,7 +90,7 @@ class Uuid
 	/**
 	 * UUID Version 4
 	 *
-	 * @return Ramsey\Uuid\UuidInterface
+	 * @return \Ramsey\Uuid\UuidInterface
 	 */
 	public function uuid4()
 	{
@@ -103,7 +103,7 @@ class Uuid
 	 * @param string|UuidInterface $ns   The namespace (must be a valid UUID)
      * @param string               $name The name to use for creating a UUID
 	 *
-	 * @return Ramsey\Uuid\UuidInterface
+	 * @return \Ramsey\Uuid\UuidInterface
 	 */
 	public function uuid5($ns, string $name)
 	{
@@ -119,7 +119,7 @@ class Uuid
 	 * @param Hexadecimal|null $node          A 48-bit number representing the hardware address
      * @param int              $clockSequence A 14-bit number used to help avoid duplicates that could arise when the clock is set backwards in time or if the node ID changes
 	 *
-	 * @return Ramsey\Uuid\UuidInterface
+	 * @return \Ramsey\Uuid\UuidInterface
 	 */
 	public function uuid6(
 		?Hexadecimal $nodeProvider = null,
@@ -149,7 +149,7 @@ class Uuid
 	 *
 	 * @param string $bytes
 	 *
-	 * @return Ramsey\Uuid\UuidInterface
+	 * @return \Ramsey\Uuid\UuidInterface
 	 */
 	public function fromBytes(string $bytes)
 	{
@@ -159,9 +159,9 @@ class Uuid
 	/**
 	 * From 128-bit integer string to UUID object
 	 *
-	 * @param string $bytes
+	 * @param string $integer
 	 *
-	 * @return Ramsey\Uuid\UuidInterface
+	 * @return \Ramsey\Uuid\UuidInterface
 	 */
 	public function fromInteger(string $integer)
 	{
@@ -171,7 +171,7 @@ class Uuid
 	/**
 	 * Creates a UUID from a DateTimeInterface instance
 	 *
-	 * @return Ramsey\Uuid\UuidInterface
+	 * @return \Ramsey\Uuid\UuidInterface
 	 */
 	public function fromDateTime(
         DateTimeInterface $dateTime,
