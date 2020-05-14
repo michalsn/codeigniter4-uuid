@@ -22,7 +22,7 @@ $psr4 = [
 
 ## How to use it
 
-In general, using `UuidModel` and `UuidEntity` have no much different than using the original classes provided with CodeIgniter 4 framework. We just have some additional config options. There is a good chance that you will not need to use `Uuid` class at all, because most of the things that happens are already automated.
+In general, using `UuidModel` and `UuidEntity` is no much different than using the original classes provided with CodeIgniter 4 framework. We just have some additional config options. There is a good chance that you will not need to use `Uuid` class at all, because most of the things that happens are already automated.
 
 ### Uuid
 
@@ -107,16 +107,20 @@ class ProjectModel extends UuidModel
 
 ```
 
-## UuidEntity
+### UuidEntity
 
 Using the `UuidEntity` is only required if we store UUID fields in the byte format. In other case there are no benefits over original `Entity` class. The same as in the `UuidModel`, by default we assume that only primary key will have the UUID type.
 
-## Differences between Model and UUidModel
+## Differences between Model and UuidModel
 
 There are a few differences between original classes and these provided here. 
 
 * `getInsertID()` method can return a string when primary key is using UUID. If insertion of the data will fail this method still returns `0`.
 * `insertBatch()` and `updateBatch()` methods are adding all "additional parameters" (insert date, update date) as it happens in case of using `insert()` or `update()` methods.
+
+## Limitations
+
+For now this class doesn't support SQLite3 database.
 
 ## Supported UUID versions
 
