@@ -20,7 +20,7 @@ use ReflectionProperty;
 use stdClass;
 
 /**
- * The Uuid class Model is based on a Model shipped with CodeIgniter.
+ * The Uuid class Model is based on a Model shipped with CodeIgniter 4.
  * This class is tightly coupled with Ramsey's Uuid class.
  */
 class UuidModel
@@ -38,7 +38,7 @@ class UuidModel
 	 *
 	 * @var string
 	 */
-	protected $uuidVersion = 'uuid1';
+	protected $uuidVersion = 'uuid4';
 
 	/**
 	 * Store UUID in byte format.
@@ -1257,7 +1257,7 @@ class UuidModel
 
 		// Make a copy of original id
 		$originalId = $id;
-		
+
 		$builder = $this->builder();
 		if (! empty($id))
 		{
