@@ -120,7 +120,7 @@ There are a few differences between original classes and these provided here.
 
 ## Limitations
 
-For now this class doesn't support SQLite3 database.
+For now this class doesn't support SQLite3 database when you want to strore UUIDs in a byte format.
 
 ## Supported UUID versions
 
