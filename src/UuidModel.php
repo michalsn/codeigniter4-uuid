@@ -530,6 +530,8 @@ class UuidModel
 			$builder->where($this->table . '.' . $this->deletedField, null);
 		}
 
+		// Make a copy of original id
+		$originalId = $id;
 		// Convert UUID fields to byte if needed
 		$id = $this->convertUuidPrimaryKeyToBytes($id);
 
@@ -556,7 +558,7 @@ class UuidModel
 		// Convert UUID fields from byte if needed
 		$row = $this->convertUuidFieldsToStrings($row, $this->tempReturnType);
 
-		$eventData = $this->trigger('afterFind', ['id' => $id, 'data' => $row]);
+		$eventData = $this->trigger('afterFind', ['id' => $originalId, 'data' => $row]);
 
 		$this->tempReturnType     = $this->returnType;
 		$this->tempUseSoftDeletes = $this->useSoftDeletes;
