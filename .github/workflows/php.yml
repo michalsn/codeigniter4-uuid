@@ -61,3 +61,5 @@ jobs:
 
       - name: Test with phpunit
         run: vendor/bin/phpunit --coverage-text
+        env:
+          database.tests.port: ${{ job.services.mysql.ports[3306] }}
