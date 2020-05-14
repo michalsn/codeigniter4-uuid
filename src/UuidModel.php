@@ -1143,6 +1143,9 @@ class UuidModel
 
 		$builder = $this->builder();
 
+		// Make a copy of original id
+		$originalId = $id;
+
 		if ($id)
 		{
 			// Convert UUID pk to byte if needed
@@ -1170,7 +1173,7 @@ class UuidModel
 		// Cleanup data before event trigger
 		$eventData['data'] = $this->convertUuidFieldsToStrings($eventData['data'], 'array');
 
-		$this->trigger('afterUpdate', ['id' => $id, 'data' => $eventData['data'], 'result' => $result]);
+		$this->trigger('afterUpdate', ['id' => $originalId, 'data' => $eventData['data'], 'result' => $result]);
 
 		return $result;
 	}
@@ -1252,6 +1255,9 @@ class UuidModel
 			$id = [$id];
 		}
 
+		// Make a copy of original id
+		$originalId = $id;
+		
 		$builder = $this->builder();
 		if (! empty($id))
 		{
@@ -1260,7 +1266,7 @@ class UuidModel
 			$builder = $builder->whereIn($this->primaryKey, $id);
 		}
 
-		$this->trigger('beforeDelete', ['id' => $id, 'purge' => $purge]);
+		$this->trigger('beforeDelete', ['id' => $originalId, 'purge' => $purge]);
 
 		if ($this->useSoftDeletes && ! $purge)
 		{
@@ -1288,7 +1294,7 @@ class UuidModel
 			$result = $builder->delete();
 		}
 
-		$this->trigger('afterDelete', ['id' => $id, 'purge' => $purge, 'result' => $result, 'data' => null]);
+		$this->trigger('afterDelete', ['id' => $originalId, 'purge' => $purge, 'result' => $result, 'data' => null]);
 
 		return $result;
 	}
