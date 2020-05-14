@@ -938,7 +938,7 @@ class UuidModel
 					if ($this->uuidUseBytes === true && ! empty($eventData['data'][$field]))
 					{
 						$this->uuidTempData[$field] = $this->uuid->fromString($eventData['data'][$field]);
-						$this->builder()->set($field, $this->uuidTempData[$field]->getBytes(), false);
+						$this->builder()->set($field, $this->uuidTempData[$field]->getBytes());
 						unset($eventData['data'][$field]);
 					}
 				}
