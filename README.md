@@ -2,6 +2,8 @@
 
 This package make it easy to work with UUIDs in Codeigniter 4. It provide three classes to make that possible: `Uuid`, `UuidModel` and `UuidEntity`. This implementation is tighly coupled with `Ramsey\Uuid`.
 
+**NOTE: This package is still in the early stage of development. Things may change!**
+
 ## Installation via composer
 
     > composer require michalsn/codeigniter4-uuid
@@ -57,9 +59,9 @@ namespace App\Models;
 
 use Michalsn\UuidModel\UuidModel;
 
-class ProjectModel extends UuidModel
+class Project1Model extends UuidModel
 {
-    protected $table      = 'projects';
+    protected $table      = 'projects_1';
     protected $primaryKey = 'id';
 
     protected $returnType = 'array';
@@ -84,11 +86,11 @@ namespace App\Models;
 
 use Michalsn\UuidModel\UuidModel;
 
-class ProjectModel extends UuidModel
+class Project2Model extends UuidModel
 {
     protected $uuidFields = ['category_id'];
 
-    protected $table      = 'projects';
+    protected $table      = 'projects_2';
     protected $primaryKey = 'id';
 
     protected $returnType = 'array';
@@ -111,9 +113,39 @@ class ProjectModel extends UuidModel
 
 Using the `UuidEntity` is only required if we store UUID fields in the byte format. In other case there are no benefits over original `Entity` class. The same as in the `UuidModel`, by default we assume that only primary key will have the UUID type.
 
+Parameter | Default value | Description
+--------- | ------------- | -----------
+`$uuids` | `['id']` | Defines the fields that will be treated as UUID. By default we assume it will be a primary key, but it can be any field or fields you want.
+
+Now let's see a two examples which will match those for models that were previously shown.
+
+```php
+namespace App\Entities;
+
+use Michalsn\Uuid\UuidEntity;
+
+class Project1Entity extends UuidEntity
+{
+
+}
+```
+
+```php
+namespace App\Entities;
+
+use Michalsn\Uuid\UuidEntity;
+
+class Project2Entity extends UuidEntity
+{
+    protected $uuids = ['category_id'];
+}
+```
+
+And that pretty much it. No more changes are needed.
+
 ## Differences between Model and UuidModel
 
-There are a few differences between original classes and these provided here. 
+There are a few differences between original class and this provided here. 
 
 * `getInsertID()` method can return a string when primary key is using UUID. If insertion of the data will fail this method still returns `0`.
 * `insertBatch()` and `updateBatch()` methods are adding all "additional parameters" (insert date, update date) as it happens in case of using `insert()` or `update()` methods.
