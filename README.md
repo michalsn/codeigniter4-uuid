@@ -63,7 +63,7 @@ Now, let's see a simple example, how to use `UuidModel` in your code. In example
 
 namespace App\Models;
 
-use Michalsn\UuidModel\UuidModel;
+use Michalsn\Uuid\UuidModel;
 
 class Project1Model extends UuidModel
 {
@@ -92,7 +92,7 @@ Now, here is an example where we will use the UUID but not as a primary key.
 
 namespace App\Models;
 
-use Michalsn\UuidModel\UuidModel;
+use Michalsn\Uuid\UuidModel;
 
 class Project2Model extends UuidModel
 {
