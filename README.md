@@ -126,7 +126,14 @@ use Michalsn\Uuid\UuidEntity;
 
 class Project1Entity extends UuidEntity
 {
-
+    protected $attributes = [
+        'id' => null,
+        'name' => null,
+        'description' => null,
+        'created_at' => null,
+        'updated_at' => null,
+        'deleted_at' => null,
+    ];
 }
 ```
 
@@ -138,6 +145,16 @@ use Michalsn\Uuid\UuidEntity;
 class Project2Entity extends UuidEntity
 {
     protected $uuids = ['category_id'];
+
+    protected $attributes = [
+        'id' => null,
+        'category_id' => null,
+        'name' => null,
+        'description' => null,
+        'created_at' => null,
+        'updated_at' => null,
+        'deleted_at' => null,
+    ];
 }
 ```
 
