@@ -14,6 +14,8 @@ Download this repo and then enable it by editing **app/Config/Autoload.php** and
 namespace to the **$psr4** array. For example, if you copied it into **app/ThirdParty**:
 
 ```php
+<?php
+
 $psr4 = [
     'Config'      => APPPATH . 'Config',
     APP_NAMESPACE => APPPATH,
@@ -31,6 +33,8 @@ In general, using `UuidModel` and `UuidEntity` is no much different than using t
 Working with `Uuid` class is really simple:
 
 ```php
+<?php
+
 $uuid = service('uuid');
 // will prepare UUID4 object
 $uuid4 = $uuid->uuid4();
@@ -55,6 +59,8 @@ Parameter | Default value | Description
 Now, let's see a simple example, how to use `UuidModel` in your code. In example below, there are no additional changes except that our model extends `UuidModel`. The primary key will be stored as UUID4 in the byte format in the database.
 
 ```php
+<?php
+
 namespace App\Models;
 
 use Michalsn\UuidModel\UuidModel;
@@ -82,6 +88,8 @@ class Project1Model extends UuidModel
 Now, here is an example where we will use the UUID but not as a primary key.
 
 ```php
+<?php
+
 namespace App\Models;
 
 use Michalsn\UuidModel\UuidModel;
@@ -120,6 +128,8 @@ Parameter | Default value | Description
 Now let's see a two examples which will match those for models that were previously shown.
 
 ```php
+<?php
+
 namespace App\Entities;
 
 use Michalsn\Uuid\UuidEntity;
@@ -138,6 +148,8 @@ class Project1Entity extends UuidEntity
 ```
 
 ```php
+<?php
+
 namespace App\Entities;
 
 use Michalsn\Uuid\UuidEntity;
