@@ -45,44 +45,87 @@ class UuidEntity extends Entity
 	}
 
 	/**
-	 * Takes an array of key/value pairs and sets them as
-	 * class properties, using any `setCamelCasedProperty()` methods
-	 * that may or may not exist.
+	 * Magic method to all protected/private class properties to be easily set,
+	 * either through a direct access or a `setCamelCasedProperty()` method.
 	 *
-	 * @param array $data
+	 * Examples:
 	 *
-	 * @return \CodeIgniter\Entity
+	 *      $this->my_property = $p;
+	 *      $this->setMyProperty() = $p;
+	 *
+	 * @param string $key
+	 * @param null   $value
+	 *
+	 * @return $this
+	 * @throws \Exception
 	 */
-	public function fill(array $data = null)
+	public function __set(string $key, $value = null)
 	{
-		if (! is_array($data))
+		// Check if field is uuid field and in byte format
+		if (! empty($this->uuids) && in_array($key, $this->uuids) && ! ctype_print($value))
 		{
+			$value = service('uuid')->fromBytes($value)->toString();
+		}
+
+		$key = $this->mapProperty($key);
+
+		// Check if the field should be mutated into a date
+		if (in_array($key, $this->dates))
+		{
+			$value = $this->mutateDate($value);
+		}
+
+		$isNullable = false;
+		$castTo     = false;
+
+		if (array_key_exists($key, $this->casts))
+		{
+			$isNullable = strpos($this->casts[$key], '?') === 0;
+			$castTo     = $isNullable ? substr($this->casts[$key], 1) : $this->casts[$key];
+		}
+
+		if (! $isNullable || ! is_null($value))
+		{
+			// Array casting requires that we serialize the value
+			// when setting it so that it can easily be stored
+			// back to the database.
+			if ($castTo === 'array')
+			{
+				$value = serialize($value);
+			}
+
+			// JSON casting requires that we JSONize the value
+			// when setting it so that it can easily be stored
+			// back to the database.
+			if (($castTo === 'json' || $castTo === 'json-array') && function_exists('json_encode'))
+			{
+				$value = json_encode($value);
+
+				if (json_last_error() !== JSON_ERROR_NONE)
+				{
+					throw CastException::forInvalidJsonFormatException(json_last_error());
+				}
+			}
+		}
+
+		// if a set* method exists for this key,
+		// use that method to insert this value.
+		// *) should be outside $isNullable check - SO maybe wants to do sth with null value automatically
+		$method = 'set' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key)));
+		if (method_exists($this, $method))
+		{
+			$this->$method($value);
+
 			return $this;
 		}
 
-		// Load Uuid service
-		$uuidObj = service('uuid');
-
-		foreach ($data as $key => $value)
-		{
-			if (! empty($this->uuids) && in_array($key, $this->uuids) && ! ctype_print($value))
-			{
-				$value = $uuidObj->fromBytes($value)->toString();
-			}
-
-			$key = $this->mapProperty($key);
-
-			$method = 'set' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key)));
-
-			if (method_exists($this, $method))
-			{
-				$this->$method($value);
-			}
-			else
-			{
-				$this->attributes[$key] = $value;
-			}
-		}
+		// Otherwise, just the value.
+		// This allows for creation of new class
+		// properties that are undefined, though
+		// they cannot be saved. Useful for
+		// grabbing values through joins,
+		// assigning relationships, etc.
+		$this->attributes[$key] = $value;
 
 		return $this;
 	}
