@@ -13,6 +13,12 @@
     }
   ],
   "license": "MIT",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/codeigniter4/CodeIgniter4"
+    }
+  ],
   "require": {
     "php" : ">=7.2",
     "ramsey/uuid": "^4.0"
@@ -20,7 +26,7 @@
   "minimum-stability": "dev",
   "require-dev": {
     "phpunit/phpunit" : "8.5.*",
-    "codeigniter4/framework": "^4.0.3"
+    "codeigniter4/codeigniter4": "dev-develop"
   },
   "autoload": {
     "psr-4": {
