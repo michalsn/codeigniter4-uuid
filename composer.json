@@ -1,0 +1,41 @@
+{
+  "name": "michalsn/codeigniter4-uuid",
+  "description": "UUID package for CodeIgniter 4 with support for Model and Entity.",
+  "keywords": [
+      "codeigniter4", "uuid", "model", "entity"
+  ],
+  "homepage": "https://github.com/michalsn/codeigniter4-uuid",
+  "authors": [
+    {
+      "name": "michalsn",
+      "homepage": "https://github.com/michalsn",
+      "role": "Developer"
+    }
+  ],
+  "license": "MIT",
+  "require": {
+    "php" : ">=7.2",
+    "ramsey/uuid": "^4.0"
+  },
+  "minimum-stability": "dev",
+  "require-dev": {
+    "phpunit/phpunit" : "8.5.*",
+    "codeigniter4/framework": "^4.0.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Michalsn\\Uuid\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\Support\\": "tests/_support"
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit",
+    "post-update-cmd": [
+      "@composer dump-autoload"
+    ]
+  }
+}

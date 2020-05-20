@@ -20,7 +20,7 @@ use ReflectionProperty;
 use stdClass;
 
 /**
- * The Uuid class Model is based on a Model shipped with CodeIgniter.
+ * The Uuid class Model is based on a Model shipped with CodeIgniter 4.
  * This class is tightly coupled with Ramsey's Uuid class.
  */
 class UuidModel
@@ -38,7 +38,7 @@ class UuidModel
 	 *
 	 * @var string
 	 */
-	protected $uuidVersion = 'uuid1';
+	protected $uuidVersion = 'uuid4';
 
 	/**
 	 * Store UUID in byte format.
@@ -530,6 +530,8 @@ class UuidModel
 			$builder->where($this->table . '.' . $this->deletedField, null);
 		}
 
+		// Make a copy of original id
+		$originalId = $id;
 		// Convert UUID fields to byte if needed
 		$id = $this->convertUuidPrimaryKeyToBytes($id);
 
@@ -556,7 +558,7 @@ class UuidModel
 		// Convert UUID fields from byte if needed
 		$row = $this->convertUuidFieldsToStrings($row, $this->tempReturnType);
 
-		$eventData = $this->trigger('afterFind', ['id' => $id, 'data' => $row]);
+		$eventData = $this->trigger('afterFind', ['id' => $originalId, 'data' => $row]);
 
 		$this->tempReturnType     = $this->returnType;
 		$this->tempUseSoftDeletes = $this->useSoftDeletes;
@@ -924,18 +926,20 @@ class UuidModel
 
 					if ($this->uuidUseBytes === true)
 					{
-						$eventData['data'][$field] = $this->uuidTempData[$field]->getBytes();
+						$this->builder()->set($field, $this->uuidTempData[$field]->getBytes());
 					}
 					else
 					{
-						$eventData['data'][$field] = $this->uuidTempData[$field]->toString();
+						$this->builder()->set($field, $this->uuidTempData[$field]->toString());
 					}
 				}
 				else
 				{
 					if ($this->uuidUseBytes === true && ! empty($eventData['data'][$field]))
 					{
-						$eventData['data'][$field] = ($this->uuid->fromString($eventData['data'][$field]))->getBytes();
+						$this->uuidTempData[$field] = $this->uuid->fromString($eventData['data'][$field]);
+						$this->builder()->set($field, $this->uuidTempData[$field]->getBytes());
+						unset($eventData['data'][$field]);
 					}
 				}
 			}
@@ -960,8 +964,18 @@ class UuidModel
 		}
 
 		// Cleanup data before event trigger
-		$eventData['data'] = $this->convertUuidFieldsToStrings($eventData['data'], 'array');
-		unset($eventData['data'][$this->primaryKey]);
+		if (! empty($this->uuidFields) && $this->uuidUseBytes === true)
+		{
+			foreach ($this->uuidFields as $field)
+			{
+				if ($field === $this->primaryKey || empty($this->uuidTempData[$field]))
+				{
+					continue;
+				}
+
+				$eventData['data'][$field] = $this->uuidTempData[$field]->toString();
+			}
+		}
 
 		// Trigger afterInsert events with the inserted data and new ID
 		$this->trigger('afterInsert', ['id' => $this->insertID, 'data' => $eventData['data'], 'result' => $result]);
@@ -1129,6 +1143,9 @@ class UuidModel
 
 		$builder = $this->builder();
 
+		// Make a copy of original id
+		$originalId = $id;
+
 		if ($id)
 		{
 			// Convert UUID pk to byte if needed
@@ -1156,7 +1173,7 @@ class UuidModel
 		// Cleanup data before event trigger
 		$eventData['data'] = $this->convertUuidFieldsToStrings($eventData['data'], 'array');
 
-		$this->trigger('afterUpdate', ['id' => $id, 'data' => $eventData['data'], 'result' => $result]);
+		$this->trigger('afterUpdate', ['id' => $originalId, 'data' => $eventData['data'], 'result' => $result]);
 
 		return $result;
 	}
@@ -1238,6 +1255,9 @@ class UuidModel
 			$id = [$id];
 		}
 
+		// Make a copy of original id
+		$originalId = $id;
+
 		$builder = $this->builder();
 		if (! empty($id))
 		{
@@ -1246,7 +1266,7 @@ class UuidModel
 			$builder = $builder->whereIn($this->primaryKey, $id);
 		}
 
-		$this->trigger('beforeDelete', ['id' => $id, 'purge' => $purge]);
+		$this->trigger('beforeDelete', ['id' => $originalId, 'purge' => $purge]);
 
 		if ($this->useSoftDeletes && ! $purge)
 		{
@@ -1274,7 +1294,7 @@ class UuidModel
 			$result = $builder->delete();
 		}
 
-		$this->trigger('afterDelete', ['id' => $id, 'purge' => $purge, 'result' => $result, 'data' => null]);
+		$this->trigger('afterDelete', ['id' => $originalId, 'purge' => $purge, 'result' => $result, 'data' => null]);
 
 		return $result;
 	}
