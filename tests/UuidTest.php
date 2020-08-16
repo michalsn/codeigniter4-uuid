@@ -20,7 +20,7 @@ class UuidTest extends \CodeIgniter\Test\CIUnitTestCase
 		$this->uuid = new Uuid($this->config);
 
         $uuid = $this->uuid->uuid1('0800200c9a66', 0x1669);
-        $this->assertInstanceOf(\Ramsey\Uuid\Rfc4122\UuidV1::class, $uuid);
+        $this->assertInstanceOf(\Ramsey\Uuid\Lazy\LazyUuidFromString::class, $uuid);
         $this->assertInstanceOf(DateTimeInterface::class, $uuid->getDateTime());
         $this->assertEquals(2, $uuid->getVariant());
         $this->assertEquals(1, $uuid->getVersion());
@@ -34,7 +34,7 @@ class UuidTest extends \CodeIgniter\Test\CIUnitTestCase
 		$this->uuid = new Uuid($this->config);
 
 		$uuid = $this->uuid->uuid3(\Ramsey\Uuid\Uuid::NIL, '0');
-		$this->assertInstanceOf(\Ramsey\Uuid\Rfc4122\UuidV3::class, $uuid);
+		$this->assertInstanceOf(\Ramsey\Uuid\Lazy\LazyUuidFromString::class, $uuid);
 
         $this->assertEquals('19826852-5007-3022-a72a-212f66e9fac3', $uuid->toString());
 	}
@@ -44,7 +44,7 @@ class UuidTest extends \CodeIgniter\Test\CIUnitTestCase
 		$this->uuid = new Uuid($this->config);
 
 		$uuid = $this->uuid->uuid4();
-        $this->assertInstanceOf(\Ramsey\Uuid\Rfc4122\UuidV4::class, $uuid);
+        $this->assertInstanceOf(\Ramsey\Uuid\Lazy\LazyUuidFromString::class, $uuid);
         $this->assertEquals(2, $uuid->getVariant());
         $this->assertEquals(4, $uuid->getVersion());
     }
@@ -62,7 +62,7 @@ class UuidTest extends \CodeIgniter\Test\CIUnitTestCase
 
         $this->assertEquals(2, $uobj1->getVariant());
         $this->assertEquals(5, $uobj1->getVersion());
-        $this->assertEquals($this->uuid->fromString($uuid), $uobj1);
+        $this->assertEquals($this->uuid->fromString($uuid)->toString(), $uobj1);
         $this->assertEquals((string) $uobj1, $uuid);
         $this->assertTrue($uobj1->equals($uobj2));
 	}
@@ -72,7 +72,7 @@ class UuidTest extends \CodeIgniter\Test\CIUnitTestCase
 		$this->uuid = new Uuid($this->config);
 
 		$uuid = $this->uuid->uuid6(new \Ramsey\Uuid\Type\Hexadecimal('0800200c9a66'), 0x1669);
-        $this->assertInstanceOf(\Ramsey\Uuid\Nonstandard\UuidV6::class, $uuid);
+        $this->assertInstanceOf(\Ramsey\Uuid\Lazy\LazyUuidFromString::class, $uuid);
         $this->assertInstanceOf(DateTimeInterface::class, $uuid->getDateTime());
         $this->assertSame(2, $uuid->getVariant());
         $this->assertSame(6, $uuid->getVersion());
@@ -86,7 +86,7 @@ class UuidTest extends \CodeIgniter\Test\CIUnitTestCase
     	$this->uuid = new Uuid($this->config);
 
         $uuid = $this->uuid->fromString('ff6f8cb0-c57d-11e1-9b21-0800200c9a66');
-        $this->assertInstanceOf(\Ramsey\Uuid\Rfc4122\UuidV1::class, $uuid);
+        $this->assertInstanceOf(\Ramsey\Uuid\Lazy\LazyUuidFromString::class, $uuid);
         $this->assertEquals('ff6f8cb0-c57d-11e1-9b21-0800200c9a66', $uuid->toString());
     }
 

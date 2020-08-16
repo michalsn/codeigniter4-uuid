@@ -6,4 +6,9 @@ class UuidModelException extends \RuntimeException
     {
         return new self(lang('UuidModel.incorrectUuidVersion', [$version]));
     }
+
+    public static function forIncorrectValueInUuidFields(string $primaryKey)
+    {
+        return new self(lang('UuidModel.incorrectValueInUuidFields', [$primaryKey]));
+    }
 }

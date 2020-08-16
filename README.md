@@ -172,13 +172,6 @@ class Project2Entity extends UuidEntity
 
 And that pretty much it. No more changes are needed.
 
-## Differences between Model and UuidModel
-
-There are a few differences between original class and this provided here. 
-
-* `getInsertID()` method can return a string when primary key is using UUID. If insertion of the data will fail this method still returns `0`.
-* `insertBatch()` and `updateBatch()` methods are adding all "additional parameters" (insert date, update date) as it happens in case of using `insert()` or `update()` methods.
-
 ## Limitations
 
 For now this class doesn't support SQLite3 database when you want to strore UUIDs in a byte format.
