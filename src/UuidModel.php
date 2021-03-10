@@ -547,7 +547,7 @@ class UuidModel extends Model
 				->insert();
 
 		// If insertion succeeded then save the insert ID
-		if ($result->resultID)
+		if ($result)
 		{
 			if (! $this->useAutoIncrement)
 			{
