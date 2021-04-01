@@ -9,8 +9,11 @@ on:
       - develop
 
 jobs:
-  main:
-    name: Build and test
+
+  tests:
+    runs-on: ubuntu-20.04
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+    name: PHP ${{ matrix.php-versions }}
 
     services:
       mysql:
@@ -24,18 +27,14 @@ jobs:
 
     strategy:
       matrix:
-        php-versions: ['7.2', '7.3', '7.4']
-
-    runs-on: ubuntu-latest
-
-    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+        php-versions: ['7.3', '7.4', '8.0']
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
       - name: Setup PHP, with composer and extensions
-        uses: shivammathur/setup-php@master
+        uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
           tools: composer, pecl, phpunit
