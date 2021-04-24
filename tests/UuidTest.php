@@ -1,8 +1,9 @@
 <?php
 
+use CodeIgniter\Test\CIUnitTestCase;
 use Michalsn\Uuid\Uuid;
 
-class UuidTest extends \CodeIgniter\Test\CIUnitTestCase
+class UuidTest extends CIUnitTestCase
 {
 	protected $config;
 

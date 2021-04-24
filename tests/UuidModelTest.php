@@ -1,12 +1,15 @@
 <?php
 
-use CodeIgniter\Test\CIDatabaseTestCase;
+use CodeIgniter\Test\CIUnitTestCase;
+use CodeIgniter\Test\DatabaseTestTrait;
 use Michalsn\Uuid\Uuid;
 use Tests\Support\Project1Model;
 use Tests\Support\Project2Model;
 
-class UuidModelTest extends CIDatabaseTestCase
+class UuidModelTest extends CIUnitTestCase
 {
+    use DatabaseTestTrait;
+    
     protected $refresh   = true;
     protected $seed      = 'Tests\Support\Database\Seeds\UuidSeeder';
     protected $basePath  = SUPPORTPATH . 'Database/';
@@ -231,7 +234,7 @@ class UuidModelTest extends CIDatabaseTestCase
         unset($result['created_at'], $result['updated_at'], $result['deleted_at']);
 
         $expected = [
-            'id' => $projectId,
+            'id' => (string) $projectId,
             'category_id' => 'c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394',
             'name' => $data['name'],
             'description' => $data['description'],
