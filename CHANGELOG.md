@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.0] - 2021-04-24
+- Official release 
+
+### Changed
+- Due to changes to the CodeIgniter Model class, we updated methods we use as well.
+- Added `UuidCast` class.
+
 ## [1.0.0-beta3] - 2021-04-02
 - Third beta release
 
