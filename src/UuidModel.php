@@ -43,15 +43,6 @@ class UuidModel extends Model
 	protected $uuidFields = ['id'];
 
 	/**
-	 * UUID temp object array.
-	 *
-	 * @var array
-	 */
-	protected $uuidTempData = [];
-
-	//--------------------------------------------------------------------
-
-	/**
 	 * Model constructor.
 	 *
 	 * @param ConnectionInterface $db
@@ -110,8 +101,6 @@ class UuidModel extends Model
 		return $results;
 	}
 
-	//--------------------------------------------------------------------
-
 	/**
 	 * Prepare UUID row - transform if needed.
 	 *
@@ -152,8 +141,6 @@ class UuidModel extends Model
 		return $row;
 	}
 
-	//--------------------------------------------------------------------
-
 	/**
 	 * Convert UUID primary key to bytes if needed
 	 *
@@ -183,8 +170,6 @@ class UuidModel extends Model
 		return $key;
 	}
 
-	//--------------------------------------------------------------------
-
 	/**
 	 * Convert UUID to bytes if needed
 	 *
@@ -211,8 +196,6 @@ class UuidModel extends Model
 
 		return $results;
 	}
-
-	//--------------------------------------------------------------------
 
 	/**
 	 * Convert UUID to bytes if needed
@@ -247,145 +230,84 @@ class UuidModel extends Model
 
 	/**
 	 * Fetches the row of database from $this->table with a primary key
-	 * matching $id.
+	 * matching $id. This methods works only with dbCalls
+	 * This methods works only with dbCalls
 	 *
-	 * @param mixed|array|null $id One primary key or an array of primary keys
+	 * @param boolean                   $singleton Single or multiple results
+	 * @param array|integer|string|null $id        One primary key or an array of primary keys
 	 *
 	 * @return array|object|null    The resulting row of data, or null.
 	 */
-	public function find($id = null)
+	protected function doFind(bool $singleton, $id = null)
 	{
-		$builder = $this->builder();
-
-		if ($this->tempUseSoftDeletes === true)
-		{
-			$builder->where($this->table . '.' . $this->deletedField, null);
-		}
-
-		// Make a copy of original id
-		$originalId = $id;
 		// Convert UUID fields to byte if needed
 		$id = $this->convertUuidPrimaryKeyToBytes($id);
-
-		if (is_array($id))
-		{
-			$row = $builder->whereIn($this->table . '.' . $this->primaryKey, $id)
-					->get();
-			$row = $row->getResult($this->tempReturnType);
-		}
-		elseif (is_numeric($id) || is_string($id))
-		{
-			$row = $builder->where($this->table . '.' . $this->primaryKey, $id)
-					->get();
-
-			$row = $row->getFirstRow($this->tempReturnType);
-		}
-		else
-		{
-			$row = $builder->get();
-
-			$row = $row->getResult($this->tempReturnType);
-		}
-
+		
+		$result = parent::doFind($singleton, $id);
 		// Convert UUID fields from byte if needed
-		$row = $this->convertUuidFieldsToStrings($row, $this->tempReturnType);
+		$result = $this->convertUuidFieldsToStrings($result, $this->tempReturnType);
 
-		$eventData = $this->trigger('afterFind', ['id' => $originalId, 'data' => $row]);
-
-		$this->tempReturnType     = $this->returnType;
-		$this->tempUseSoftDeletes = $this->useSoftDeletes;
-
-		return $eventData['data'];
+		return $result;
 	}
-
-	//--------------------------------------------------------------------
 
 	/**
 	 * Fetches the column of database from $this->table
+	 * This methods works only with dbCalls
 	 *
-	 * @param string $columnName
+	 * @param string $columnName Column Name
 	 *
-	 * @return array|null   The resulting row of data, or null if no data found.
-	 * @throws \CodeIgniter\Database\Exceptions\DataException
+	 * @return array|null The resulting row of data, or null if no data found.
 	 */
-	public function findColumn(string $columnName)
+	protected function doFindColumn(string $columnName)
 	{
-		if (strpos($columnName, ',') !== false)
-		{
-			throw DataException::forFindColumnHaveMultipleColumns();
-		}
-
-		$resultSet = $this->select($columnName)
-						  ->asArray()
-						  ->find();
-
+		$result = parent::doFindColumn($columnName);
+		
 		// Convert UUID fields from byte if needed
 		if (in_array($columnName, $this->uuidFields) && $this->uuidUseBytes === true)
 		{
-			$resultSet = $this->convertUuidFieldsToStrings($resultSet, 'array');
+			$result = $this->convertUuidFieldsToStrings($result, 'array');
 		}
 
-		return (! empty($resultSet)) ? array_column($resultSet, $columnName) : null;
+		return $result;
 	}
-
-	//--------------------------------------------------------------------
 
 	/**
 	 * Works with the current Query Builder instance to return
 	 * all results, while optionally limiting them.
+	 * This methods works only with dbCalls
 	 *
-	 * @param integer $limit
-	 * @param integer $offset
+	 * @param integer $limit  Limit
+	 * @param integer $offset Offset
 	 *
 	 * @return array
 	 */
-	public function findAll(int $limit = 0, int $offset = 0)
+	protected function doFindAll(int $limit = 0, int $offset = 0)
 	{
-		$builder = $this->builder();
-
-		if ($this->tempUseSoftDeletes === true)
-		{
-			$builder->where($this->table . '.' . $this->deletedField, null);
-		}
-
-		$row = $builder->limit($limit, $offset)
-				->get();
-
-		$row = $row->getResult($this->tempReturnType);
-
+		$result = parent::doFindAll($limit, $offset);
 		// Convert UUID fields from byte if needed
-		$row = $this->convertUuidFieldsToStrings($row, $this->tempReturnType);
+		$result = $this->convertUuidFieldsToStrings($result, $this->tempReturnType);
 
-		$eventData = $this->trigger('afterFind', ['data' => $row, 'limit' => $limit, 'offset' => $offset]);
-
-		$this->tempReturnType     = $this->returnType;
-		$this->tempUseSoftDeletes = $this->useSoftDeletes;
-
-		return $eventData['data'];
+		return $result;
 	}
-
-	//--------------------------------------------------------------------
 
 	/**
 	 * Returns the first row of the result set. Will take any previous
 	 * Query Builder calls into account when determining the result set.
+	 * This methods works only with dbCalls
 	 *
 	 * @return array|object|null
 	 */
-	public function first()
+	protected function doFirst()
 	{
 		$builder = $this->builder();
 
-		if ($this->tempUseSoftDeletes === true)
+		if ($this->tempUseSoftDeletes)
 		{
 			$builder->where($this->table . '.' . $this->deletedField, null);
 		}
-		else
+		elseif ($this->useSoftDeletes && empty($builder->QBGroupBy) && $this->primaryKey)
 		{
-			if ($this->useSoftDeletes === true && empty($builder->QBGroupBy) && ! empty($this->primaryKey))
-			{
-				$builder->groupBy($this->table . '.' . $this->primaryKey);
-			}
+			$builder->groupBy($this->table . '.' . $this->primaryKey);
 		}
 
 		// Search when UUID6 is used as primary key
@@ -398,166 +320,84 @@ class UuidModel extends Model
 		{
 			$builder->orderBy($this->table . '.' . $this->createdField, 'asc');
 		}
-
 		// Some databases, like PostgreSQL, need order
 		// information to consistently return correct results.
-		elseif (! empty($builder->QBGroupBy) && empty($builder->QBOrderBy) && ! empty($this->primaryKey))
+		elseif ($builder->QBGroupBy && empty($builder->QBOrderBy) && $this->primaryKey)
 		{
 			$builder->orderBy($this->table . '.' . $this->primaryKey, 'asc');
 		}
 
-		$row = $builder->limit(1, 0)
-					   ->get();
-
-		$row = $row->getFirstRow($this->tempReturnType);
-
+		$result =  $builder->limit(1, 0)->get()->getFirstRow($this->tempReturnType);
+		
 		// Convert UUID fields from byte if needed
-		$row = $this->convertUuidFieldsToStrings($row, $this->tempReturnType);
-
-		$eventData = $this->trigger('afterFind', ['data' => $row]);
-
-		$this->tempReturnType     = $this->returnType;
-		$this->tempUseSoftDeletes = $this->useSoftDeletes;
-
-		return $eventData['data'];
+		return $this->convertUuidFieldsToStrings($result, $this->tempReturnType);
 	}
 
-	//--------------------------------------------------------------------
-
 	/**
-	 * Inserts data into the current table. If an object is provided,
-	 * it will attempt to convert it to an array.
+	 * Inserts data into the current table.
+	 * This methods works only with dbCalls
 	 *
-	 * @param array|object $data
-	 * @param boolean      $returnID Whether insert ID should be returned or not.
+	 * @param array $data Data
 	 *
-	 * @return BaseResult|integer|string|false
-	 * @throws \ReflectionException
+	 * @return Query|boolean
 	 */
-	public function insert($data = null, bool $returnID = true)
+	protected function doInsert(array $data)
 	{
-		$escape = null;
-
-		$this->insertID = 0;
-
-		if (empty($data))
-		{
-			$data           = $this->tempData['data'] ?? null;
-			$escape         = $this->tempData['escape'] ?? null;
-			$this->tempData = [];
-		}
-
-		if (empty($data))
-		{
-			throw DataException::forEmptyDataset('insert');
-		}
-
-		// If $data is using a custom class with public or protected
-		// properties representing the table elements, we need to grab
-		// them as an array.
-		if (is_object($data) && ! $data instanceof stdClass)
-		{
-			$data = static::classToArray($data, $this->primaryKey, $this->dateFormat, false);
-		}
-
-		// If it's still a stdClass, go ahead and convert to
-		// an array so doProtectFields and other model methods
-		// don't have to do special checks.
-		if (is_object($data))
-		{
-			$data = (array) $data;
-		}
-
-		if (empty($data))
-		{
-			throw DataException::forEmptyDataset('insert');
-		}
-
-		// Validate data before saving.
-		if ($this->skipValidation === false)
-		{
-			if ($this->cleanRules()->validate($data) === false)
-			{
-				return false;
-			}
-		}
-
-		// Must be called first so we don't
-		// strip out created_at values.
-		$data = $this->doProtectFields($data);
-
-		// Set created_at and updated_at with same time
-		$date = $this->setDate();
-
-		if ($this->useTimestamps && ! empty($this->createdField) && ! array_key_exists($this->createdField, $data))
-		{
-			$data[$this->createdField] = $date;
-		}
-
-		if ($this->useTimestamps && ! empty($this->updatedField) && ! array_key_exists($this->updatedField, $data))
-		{
-			$data[$this->updatedField] = $date;
-		}
-
-		$eventData = ['data' => $data];
-		if ($this->tempAllowCallbacks)
-		{
-			$eventData = $this->trigger('beforeInsert', $eventData);
-		}
+		$escape       = $this->escape;
+		$this->escape = [];
 
 		// Require non empty primaryKey when
 		// not using auto-increment feature
-		if (! $this->useAutoIncrement && empty($eventData['data'][$this->primaryKey]))
+		if (! $this->useAutoIncrement && empty($data[$this->primaryKey]))
 		{
 			throw DataException::forEmptyPrimaryKey('insert');
 		}
 
+		$builder = $this->builder();
+
 		if (! empty($this->uuidFields))
 		{
-			foreach ($this->uuidFields as $field)
+			if (in_array($this->primaryKey, $this->uuidFields) && empty($data[$this->primaryKey]))
 			{
-				if ($field === $this->primaryKey)
-				{
-					$this->uuidTempData[$field] = $this->uuid->{$this->uuidVersion}();
+				$primaryVal = $this->uuid->{$this->uuidVersion}();
 
-					if ($this->uuidUseBytes === true)
-					{
-						$this->builder()->set($field, $this->uuidTempData[$field]->getBytes());
-					}
-					else
-					{
-						$this->builder()->set($field, $this->uuidTempData[$field]->toString());
-					}
+				if ($this->uuidUseBytes === true)
+				{
+					$builder->set($this->primaryKey, $primaryVal->getBytes());
 				}
 				else
 				{
-					if ($this->uuidUseBytes === true && ! empty($eventData['data'][$field]))
-					{
-						$this->uuidTempData[$field] = $this->uuid->fromString($eventData['data'][$field]);
-						$this->builder()->set($field, $this->uuidTempData[$field]->getBytes());
-						unset($eventData['data'][$field]);
-					}
+					$builder->set($this->primaryKey, $primaryVal->toString());
 				}
 			}
+		}		
+
+		// Must use the set() method to ensure to set the correct escape flag
+		foreach ($data as $key => $val)
+		{
+			// Convert UUID fields if needed
+			if (in_array($key, $this->uuidFields) && $this->uuidUseBytes === true)
+			{
+				$val = ($this->uuid->fromString($val))->getBytes();
+			}
+			
+			$builder->set($key, $val, $escape[$key] ?? null);
 		}
 
-		// Must use the set() method to ensure objects get converted to arrays
-		$result = $this->builder()
-				->set($eventData['data'], '', $escape)
-				->insert();
+		$result = $builder->insert();
 
 		// If insertion succeeded then save the insert ID
 		if ($result)
 		{
 			if (! $this->useAutoIncrement)
 			{
-				$this->insertID = $eventData['data'][$this->primaryKey];
+				$this->insertID = $data[$this->primaryKey];
 			}
 			else
 			{
 				if (in_array($this->primaryKey, $this->uuidFields))
 				{
-					$this->insertID = $this->uuidTempData[$this->primaryKey]->toString();
+					$this->insertID = empty($primaryVal) ? $data[$this->primaryKey] : $primaryVal->toString();
 				}
 				else
 				{
@@ -566,104 +406,31 @@ class UuidModel extends Model
 			}
 		}
 
-		// Cleanup data before event trigger
-		if (! empty($this->uuidFields) && $this->uuidUseBytes === true)
-		{
-			foreach ($this->uuidFields as $field)
-			{
-				if ($field === $this->primaryKey || empty($this->uuidTempData[$field]))
-				{
-					continue;
-				}
-
-				$eventData['data'][$field] = $this->uuidTempData[$field]->toString();
-			}
-		}
-
-		$eventData = [
-			'id'     => $this->insertID,
-			'data'   => $eventData['data'],
-			'result' => $result,
-		];
-		if ($this->tempAllowCallbacks)
-		{
-			// Trigger afterInsert events with the inserted data and new ID
-			$this->trigger('afterInsert', $eventData);
-		}
-		$this->tempAllowCallbacks = $this->allowCallbacks;
-
-		// If insertion failed, get out of here
-		if (! $result)
-		{
-			return $result;
-		}
-
-		// otherwise return the insertID, if requested.
-		return $returnID ? $this->insertID : $result;
+		return $result;
 	}
-
-	//--------------------------------------------------------------------
 
 	/**
 	 * Compiles batch insert strings and runs the queries, validating each row prior.
+	 * This methods works only with dbCalls
 	 *
-	 * @param array   $set       An associative array of insert values
-	 * @param boolean $escape    Whether to escape values and identifiers
-	 * @param integer $batchSize The size of the batch to run
-	 * @param boolean $testing   True means only number of records is returned, false will execute the query
+	 * @param array|null   $set       An associative array of insert values
+	 * @param boolean|null $escape    Whether to escape values and identifiers
+	 * @param integer      $batchSize The size of the batch to run
+	 * @param boolean      $testing   True means only number of records is returned, false will execute the query
 	 *
 	 * @return integer|boolean Number of rows inserted or FALSE on failure
 	 */
-	public function insertBatch(array $set = null, bool $escape = null, int $batchSize = 100, bool $testing = false)
+	protected function doInsertBatch(?array $set = null, ?bool $escape = null, int $batchSize = 100, bool $testing = false)
 	{
 		if (is_array($set))
 		{
 			foreach ($set as &$row)
 			{
-				// If $data is using a custom class with public or protected
-				// properties representing the table elements, we need to grab
-				// them as an array.
-				if (is_object($row) && ! $row instanceof stdClass)
-				{
-					$row = static::classToArray($row, $this->primaryKey, $this->dateFormat, false);
-				}
-
-				// If it's still a stdClass, go ahead and convert to
-				// an array so doProtectFields and other model methods
-				// don't have to do special checks.
-				if (is_object($row))
-				{
-					$row = (array) $row;
-				}
-
-				// Validate every row..
-				if ($this->skipValidation === false && $this->cleanRules()->validate($row) === false)
-				{
-					return false;
-				}
-
-				// Must be called first so we don't
-				// strip out created_at values.
-				$row = $this->doProtectFields($row);
-
 				// Require non empty primaryKey when
 				// not using auto-increment feature
 				if (! $this->useAutoIncrement && empty($row[$this->primaryKey]))
 				{
 					throw DataException::forEmptyPrimaryKey('insertBatch');
-				}
-
-				// Set created_at and updated_at with same time
-				$date = $this->setDate();
-
-				if ($this->useTimestamps && ! empty($this->createdField) && ! array_key_exists($this->createdField, $row))
-				{
-					$row[$this->createdField] = $date;
-				}
-
-				if ($this->useTimestamps && ! empty($this->updatedField) && ! array_key_exists($this->updatedField, $row))
-				{
-					$row[$this->updatedField] = $date;
 				}
 
 				// Add primary key and convert to bytes if needed
@@ -697,205 +464,68 @@ class UuidModel extends Model
 		return $this->builder()->testMode($testing)->insertBatch($set, $escape, $batchSize);
 	}
 
-	//--------------------------------------------------------------------
-
 	/**
-	 * Updates a single record in $this->table. If an object is provided,
-	 * it will attempt to convert it into an array.
+	 * Updates a single record in $this->table.
+	 * This methods works only with dbCalls
 	 *
-	 * @param integer|array|string $id
-	 * @param array|object         $data
+	 * @param integer|array|string|null $id   ID
+	 * @param array|null                $data Data
 	 *
 	 * @return boolean
-	 * @throws \ReflectionException
 	 */
-	public function update($id = null, $data = null): bool
+	protected function doUpdate($id = null, $data = null): bool
 	{
-		$escape = null;
-
-		if (is_numeric($id) || is_string($id))
-		{
-			$id = [$id];
-		}
-
-		if (empty($data))
-		{
-			$data           = $this->tempData['data'] ?? null;
-			$escape         = $this->tempData['escape'] ?? null;
-			$this->tempData = [];
-		}
-
-		if (empty($data))
-		{
-			throw DataException::forEmptyDataset('update');
-		}
-
-		// If $data is using a custom class with public or protected
-		// properties representing the table elements, we need to grab
-		// them as an array.
-		if (is_object($data) && ! $data instanceof stdClass)
-		{
-			$data = static::classToArray($data, $this->primaryKey, $this->dateFormat);
-		}
-
-		// If it's still a stdClass, go ahead and convert to
-		// an array so doProtectFields and other model methods
-		// don't have to do special checks.
-		if (is_object($data))
-		{
-			$data = (array) $data;
-		}
-
-		// If it's still empty here, means $data is no change or is empty object
-		if (empty($data))
-		{
-			throw DataException::forEmptyDataset('update');
-		}
-
-		// Validate data before saving.
-		if ($this->skipValidation === false)
-		{
-			if ($this->cleanRules(true)->validate($data) === false)
-			{
-				return false;
-			}
-		}
-
-		// Must be called first so we don't
-		// strip out updated_at values.
-		$data = $this->doProtectFields($data);
-
-		if ($this->useTimestamps && ! empty($this->updatedField) && ! array_key_exists($this->updatedField, $data))
-		{
-			$data[$this->updatedField] = $this->setDate();
-		}
-
-		$eventData = [
-			'id'   => $id,
-			'data' => $data,
-		];
-		if ($this->tempAllowCallbacks)
-		{
-			$eventData = $this->trigger('beforeUpdate', $eventData);
-		}
+		$escape       = $this->escape;
+		$this->escape = [];
 
 		$builder = $this->builder();
 
-		// Make a copy of original id
-		$originalId = $id;
-
 		if ($id)
 		{
-			// Convert UUID pk to byte if needed
 			$id      = $this->convertUuidPrimaryKeyToBytes($id);
 			$builder = $builder->whereIn($this->table . '.' . $this->primaryKey, $id);
 		}
 
-		// Convert UUID fields if needed
-		if (! empty($this->uuidFields) && $this->uuidUseBytes === true)
+		// Must use the set() method to ensure to set the correct escape flag
+		foreach ($data as $key => $val)
 		{
-			foreach ($this->uuidFields as $field)
+			// Convert UUID fields if needed
+			if (in_array($key, $this->uuidFields) && $this->uuidUseBytes === true)
 			{
-				if (! empty($eventData['data'][$field]))
-				{
-					$eventData['data'][$field] = ($this->uuid->fromString($eventData['data'][$field]))->getBytes();
-				}
+				$val = ($this->uuid->fromString($val))->getBytes();
 			}
+
+			$builder->set($key, $val, $escape[$key] ?? null);
 		}
 
-		// Must use the set() method to ensure objects get converted to arrays
-		$result = $builder
-				->set($eventData['data'], '', $escape)
-				->update();
-
-		// Cleanup data before event trigger
-		$eventData['data'] = $this->convertUuidFieldsToStrings($eventData['data'], 'array');
-
-		$eventData = [
-			'id'     => $originalId,
-			'data'   => $eventData['data'],
-			'result' => $result,
-		];
-
-		if ($this->tempAllowCallbacks)
-		{
-			$this->trigger('afterUpdate', $eventData);
-		}
-		$this->tempAllowCallbacks = $this->allowCallbacks;
-
-		return $result;
+		return $builder->update();
 	}
 
-	//--------------------------------------------------------------------
-
 	/**
-	 * Update_Batch
-	 *
 	 * Compiles an update string and runs the query
+	 * This methods works only with dbCalls
 	 *
-	 * @param array   $set       An associative array of update values
-	 * @param string  $index     The where key
-	 * @param integer $batchSize The size of the batch to run
-	 * @param boolean $returnSQL True means SQL is returned, false will execute the query
+	 * @param array|null  $set       An associative array of update values
+	 * @param string|null $index     The where key
+	 * @param integer     $batchSize The size of the batch to run
+	 * @param boolean     $returnSQL True means SQL is returned, false will execute the query
 	 *
 	 * @return mixed    Number of rows affected or FALSE on failure
-	 * @throws \CodeIgniter\Database\Exceptions\DatabaseException
+	 *
+	 * @throws DatabaseException
 	 */
-	public function updateBatch(array $set = null, string $index = null, int $batchSize = 100, bool $returnSQL = false)
+	protected function doUpdateBatch(array $set = null, string $index = null, int $batchSize = 100, bool $returnSQL = false)
 	{
-		if (is_array($set))
+		foreach ($set as &$row)
 		{
-			foreach ($set as &$row)
+			// Convert UUID fields if needed
+			if (! empty($this->uuidFields) && $this->uuidUseBytes === true)
 			{
-				// If $data is using a custom class with public or protected
-				// properties representing the table elements, we need to grab
-				// them as an array.
-				if (is_object($row) && ! $row instanceof stdClass)
+				foreach ($this->uuidFields as $field)
 				{
-					$row = static::classToArray($row, $this->primaryKey, $this->dateFormat);
-				}
-
-				// If it's still a stdClass, go ahead and convert to
-				// an array so doProtectFields and other model methods
-				// don't have to do special checks.
-				if (is_object($row))
-				{
-					$row = (array) $row;
-				}
-
-				// Validate data before saving.
-				if ($this->skipValidation === false && $this->cleanRules(true)->validate($row) === false)
-				{
-					return false;
-				}
-
-				// Save updateIndex for later
-				$updateIndex = $row[$index] ?? null;
-
-				// Must be called first so we don't
-				// strip out updated_at values.
-				$row = $this->doProtectFields($row);
-
-				// Restore updateIndex value in case it was wiped out
-				if ($updateIndex !== null)
-				{
-					$row[$index] = $updateIndex;
-				}
-
-				if ($this->useTimestamps && ! empty($this->updatedField) && ! array_key_exists($this->updatedField, $row))
-				{
-					$row[$this->updatedField] = $this->setDate();
-				}
-
-				// Convert UUID fields if needed
-				if (! empty($this->uuidFields) && $this->uuidUseBytes === true)
-				{
-					foreach ($this->uuidFields as $field)
+					if (! empty($row[$field]))
 					{
-						if (! empty($row[$field]))
-						{
-							$row[$field] = ($this->uuid->fromString($row[$field]))->getBytes();
-						}
+						$row[$field] = ($this->uuid->fromString($row[$field]))->getBytes();
 					}
 				}
 			}
@@ -904,85 +534,23 @@ class UuidModel extends Model
 		return $this->builder()->testMode($returnSQL)->updateBatch($set, $index, $batchSize);
 	}
 
-	//--------------------------------------------------------------------
-
 	/**
 	 * Deletes a single record from $this->table where $id matches
 	 * the table's primaryKey
+	 * This methods works only with dbCalls
 	 *
 	 * @param integer|string|array|null $id    The rows primary key(s)
 	 * @param boolean                   $purge Allows overriding the soft deletes setting.
 	 *
-	 * @return BaseResult|boolean
-	 * @throws \CodeIgniter\Database\Exceptions\DatabaseException
+	 * @return string|boolean
+	 *
+	 * @throws DatabaseException
 	 */
-	public function delete($id = null, bool $purge = false)
+	protected function doDelete($id = null, bool $purge = false)
 	{
-		if (! empty($id) && (is_numeric($id) || is_string($id)))
-		{
-			$id = [$id];
-		}
-
-		// Make a copy of original id
-		$originalId = $id;
-
-		$builder = $this->builder();
-
-		if (! empty($id))
-		{
-			// Convert UUID pk to byte if needed
-			$id      = $this->convertUuidPrimaryKeyToBytes($id);
-			$builder = $builder->whereIn($this->primaryKey, $id);
-		}
-
-		$eventData = [
-			'id'    => $originalId,
-			'purge' => $purge,
-		];
-		if ($this->tempAllowCallbacks)
-		{
-			$this->trigger('beforeDelete', $eventData);
-		}
-
-		if ($this->useSoftDeletes && ! $purge)
-		{
-			if (empty($builder->getCompiledQBWhere()))
-			{
-				if (CI_DEBUG)
-				{
-					throw new DatabaseException('Deletes are not allowed unless they contain a "where" or "like" clause.');
-				}
-				// @codeCoverageIgnoreStart
-				return false;
-				// @codeCoverageIgnoreEnd
-			}
-			$set[$this->deletedField] = $this->setDate();
-
-			if ($this->useTimestamps && ! empty($this->updatedField))
-			{
-				$set[$this->updatedField] = $this->setDate();
-			}
-
-			$result = $builder->update($set);
-		}
-		else
-		{
-			$result = $builder->delete();
-		}
-
-		$eventData = [
-			'id'     => $originalId,
-			'purge'  => $purge,
-			'result' => $result,
-			'data'   => null,
-		];
-		if ($this->tempAllowCallbacks)
-		{
-			$this->trigger('afterDelete', $eventData);
-		}
-		$this->tempAllowCallbacks = $this->allowCallbacks;
-
-		return $result;
+		// Convert UUID pk to byte if needed
+		$id = $this->convertUuidPrimaryKeyToBytes($id);
+		return parent::doDelete($id, $purge);
 	}
 
 }
