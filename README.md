@@ -1,8 +1,6 @@
 # CodeIgniter 4 UUID [![](https://github.com/michalsn/codeigniter4-uuid/workflows/PHP%20Tests/badge.svg)](https://github.com/michalsn/codeigniter4-uuid/actions?query=workflow%3A%22PHP+Tests%22)
 
-This package make it easy to work with UUIDs in Codeigniter 4. It provide three classes to make that possible: `Uuid`, `UuidModel` and `UuidEntity`. This implementation is tighly coupled with `Ramsey\Uuid`.
-
-**NOTE: This package is still in the early stage of development. Things may change!**
+This package make it easy to work with UUIDs in Codeigniter 4. It provide four classes to make that possible: `Uuid`, `UuidModel`, `UuidEntity` and `UuidCast`. This implementation is tighly coupled with [Ramsey\Uuid](https://github.com/ramsey/uuid).
 
 ## Installation via composer
 
@@ -171,6 +169,31 @@ class Project2Entity extends UuidEntity
 ```
 
 And that pretty much it. No more changes are needed.
+
+### UuidCast
+
+**NOTE: Don't use this casting class if you intend to use the `UuidModel` class.**
+
+Since CodeIgniter now allows the use of custom cast classes in Entities, we've also added our own casting class. This casting class enables the UUID to be converted from byte to string during data retrieval and reverse on data setting. Normally you will not use the cast function as the transition from strings to bytes is done in the `UuidModel` class.  With that in mind, you should only use this cast feature when you want to work with the Entity without using `UuidModel` class later.
+
+This is a simple example of how we would use our casting class with Entity.
+
+```php
+<?php
+
+namespace App\Entities;
+
+class MyEntity extends Entity
+{
+    protected $casts = [
+        'id' => 'uuid',
+    ];
+
+    protected $castHandlers = [
+        'uuid' => 'Michalsn\Uuid\UuidCast',
+    ];
+}
+```
 
 ## Limitations
 
