@@ -2,7 +2,7 @@
 
 namespace Michalsn\Uuid;
 
-use CodeIgniter\Entity;
+use CodeIgniter\Entity\Entity;
 
 /**
  * Entity encapsulation, for use with Michalsn\Uuid\UuidModel
