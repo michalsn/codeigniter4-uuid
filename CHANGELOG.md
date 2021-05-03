@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.1] - 2021-05-03
+
+### Fixed
+- Fixed inserting `null` value when UUID field should be translated into byte form. Thanks to [@yassinedoghri](https://github.com/yassinedoghri)
+
 ## [1.0.0] - 2021-04-24
 - Official release 
 
