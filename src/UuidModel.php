@@ -376,7 +376,7 @@ class UuidModel extends Model
 		foreach ($data as $key => $val)
 		{
 			// Convert UUID fields if needed
-			if (in_array($key, $this->uuidFields) && $this->uuidUseBytes === true)
+			if ($val && in_array($key, $this->uuidFields) && $this->uuidUseBytes === true)
 			{
 				$val = ($this->uuid->fromString($val))->getBytes();
 			}
@@ -490,7 +490,7 @@ class UuidModel extends Model
 		foreach ($data as $key => $val)
 		{
 			// Convert UUID fields if needed
-			if (in_array($key, $this->uuidFields) && $this->uuidUseBytes === true)
+			if ($val && in_array($key, $this->uuidFields) && $this->uuidUseBytes === true)
 			{
 				$val = ($this->uuid->fromString($val))->getBytes();
 			}
