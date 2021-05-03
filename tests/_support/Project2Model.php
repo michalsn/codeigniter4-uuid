@@ -19,7 +19,6 @@ class Project2Model extends UuidModel
     protected $useTimestamps = true;
 
     protected $validationRules = [
-        'category_id' => 'required',
         'name' => 'required|min_length[3]',
         'description' => 'required',
     ];

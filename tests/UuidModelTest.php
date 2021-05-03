@@ -263,6 +263,51 @@ class UuidModelTest extends CIUnitTestCase
         $this->seeInDatabase('projects2', $expected);
     }
 
+    public function testInsertNullWithoutUuidPrimaryKey()
+    {
+        $projectModel = new Project2Model();
+        
+        $data = [
+            'category_id' => null,
+            'name' => 'Sample name',
+            'description' => 'Sample description',
+        ];
+
+        $projectId = $projectModel->insert($data);
+
+        $result = $projectModel->find($projectId);
+        unset($result['created_at'], $result['updated_at'], $result['deleted_at']);
+
+        $expected = [
+            'id' => (string) $projectId,
+            'category_id' => null,
+            'name' => $data['name'],
+            'description' => $data['description'],
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testUpdateNullWithoutUuidPrimaryKey()
+    {
+        $projectModel = new Project2Model();
+        $config = new \Michalsn\Uuid\Config\Uuid();
+        $uuid = new Uuid($config);
+
+        $row = $projectModel->update(1, [
+            'name' => 'updated', 'category_id' => null
+        ]);
+
+        $expected = [
+            'id'           => '1',
+            'category_id'  => null,
+            'name'         => 'updated',
+            'description'  => 'Description 1',
+        ];
+
+        $this->seeInDatabase('projects2', $expected);
+    }
+
     public function testDeleteWithoutUuidPrimaryKey()
     {
         $projectModel = new Project2Model();

@@ -39,6 +39,7 @@ class Uuid extends Migration
 			'category_id' => [
 				'type'           => 'BINARY',
 				'constraint'     => 16,
+				'null'           => true,
 			],
 			'name' => [
 				'type'           => 'VARCHAR',
