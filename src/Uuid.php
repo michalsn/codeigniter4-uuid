@@ -137,7 +137,7 @@ class Uuid
 	 *
 	 * @param string $uuid
 	 *
-	 * @return Ramsey\Uuid\UuidInterface
+	 * @return \Ramsey\Uuid\UuidInterface
 	 */
 	public function fromString(string $uuid)
 	{
