@@ -5,6 +5,9 @@ use Michalsn\Uuid\Uuid;
 
 class Services extends BaseService
 {
+    /**
+     * @return Uuid
+     */
     public static function uuid(bool $getShared = true)
     {
 		if ($getShared)
