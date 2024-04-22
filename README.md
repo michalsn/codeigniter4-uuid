@@ -1,5 +1,4 @@
-# CodeIgniter 4 UUID [![](https://github.com/michalsn/codeigniter4-uuid/workflows/PHP%20Tests/badge.svg)](https://github.com/michalsn/codeigniter4-uuid/actions?query=workflow%3A%22PHP+Tests%22)
-
+# CodeIgniter 4 UUID [![PHP Tests](https://github.com/michalsn/codeigniter4-uuid/actions/workflows/php.yml/badge.svg)](https://github.com/michalsn/codeigniter4-uuid/actions/workflows/php.yml)
 This package make it easy to work with UUIDs in Codeigniter 4. It provide four classes to make that possible: `Uuid`, `UuidModel`, `UuidEntity` and `UuidCast`. This implementation is tighly coupled with [Ramsey\Uuid](https://github.com/ramsey/uuid).
 
 ## Installation via composer
