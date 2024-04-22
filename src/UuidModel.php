@@ -4,6 +4,8 @@ namespace Michalsn\Uuid;
 
 use CodeIgniter\Database\Exceptions\DataException;
 use CodeIgniter\Model;
+use CodeIgniter\Database\ConnectionInterface;
+use CodeIgniter\Validation\ValidationInterface;
 use Michalsn\Uuid\Exceptions\UuidModelException;
 use Michalsn\Uuid\Uuid;
 
@@ -281,7 +283,7 @@ class UuidModel extends Model
 	 *
 	 * @return array
 	 */
-	protected function doFindAll(int $limit = 0, int $offset = 0)
+	protected function doFindAll(int $limit = null, int $offset = 0)
 	{
 		$result = parent::doFindAll($limit, $offset);
 		// Convert UUID fields from byte if needed
