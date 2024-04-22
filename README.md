@@ -4,7 +4,7 @@ This package make it easy to work with UUIDs in Codeigniter 4. It provide four c
 
 ## Installation via composer
 
-    > composer require michalsn/codeigniter4-uuid
+    composer require michalsn/codeigniter4-uuid
 
 ## Manual installation
 
@@ -21,6 +21,13 @@ $psr4 = [
     'Michalsn\Uuid' => APPPATH . 'ThirdParty/codeigniter4-uuid/src',
 ];
 ```
+
+## Versions
+
+| CodeIgniter version | This package version |
+|---------------------|----------------------|
+| `>= 4.5`            | `>= 1.1`             |
+| `< 4.5`             | `< 1.1`              |
 
 ## How to use it
 
