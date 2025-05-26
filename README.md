@@ -212,7 +212,8 @@ For now this class doesn't support SQLite3 database when you want to strore UUID
 * Version 3: Name-based (MD5) - `uuid3`
 * Version 4: Random - `uuid4`
 * Version 5: Name-based (SHA-1) - `uuid5`
-* Version 6: Ordered-Time (nonstandard yet) - `uuid6`
+* Version 6: Ordered-Time - `uuid6`
+* Version 7: Ordered-Time Random - `uuid7`
 
 ## License
 

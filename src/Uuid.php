@@ -132,6 +132,18 @@ class Uuid
 		);
 	}
 
+    /**
+     * UUID Version 7
+     *
+     * @param \DateTimeImmutable|null $dateTimeImmutable    To use an existing date and time to generate a version 7 UUID, you may pass a \DateTimeInterface instance to the uuid7() method.
+     *
+     * @return \Ramsey\Uuid\UuidInterface
+     */
+    public function uuid7(?\DateTimeImmutable $dateTimeImmutable = null) : \Ramsey\Uuid\UuidInterface
+    {
+        return RamseyUuid::uuid7($dateTimeImmutable);
+    }
+
 	/**
 	 * From string to UUID object
 	 *
