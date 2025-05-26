@@ -8,7 +8,7 @@ class Uuid extends BaseConfig
 	// Supported UUID versions
 	//--------------------------------------------------------------------
 
-	public $supportedVersions = ['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'];
+	public $supportedVersions = ['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6', 'uuid7'];
 
 	//--------------------------------------------------------------------
 	// UUID version 1 optional config
@@ -55,7 +55,7 @@ class Uuid extends BaseConfig
 	//--------------------------------------------------------------------
 	// UUID version 6 optional config
 	//--------------------------------------------------------------------
-	// See more: https://uuid.ramsey.dev/en/latest/nonstandard/version6.html
+	// See more: https://uuid.ramsey.dev/en/stable/rfc4122/version6.html
 
 	public $uuid6 = [
 		'nodeProvider' => null,
