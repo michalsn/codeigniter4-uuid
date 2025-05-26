@@ -29,7 +29,7 @@ class UuidModel extends Model
 	 *
 	 * @var string
 	 */
-	protected $uuidVersion = 'uuid4';
+	protected $uuidVersion = 'uuid7';
 
 	/**
 	 * Store UUID in byte format.
