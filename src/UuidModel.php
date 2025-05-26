@@ -24,11 +24,12 @@ class UuidModel extends Model
 
 	/**
 	 * Used UUID version.
-	 * Available options: uuid1, uuid2, uuid3, uuid4, uuid5, uuid6.
+	 * Available options: uuid1, uuid2, uuid3, uuid4, uuid5, uuid6, uuid7.
+     * `uuid7` is a best option for storing UUIDs in a byte format for new projects.
 	 *
 	 * @var string
 	 */
-	protected $uuidVersion = 'uuid4';
+	protected $uuidVersion = 'uuid7';
 
 	/**
 	 * Store UUID in byte format.
@@ -312,8 +313,8 @@ class UuidModel extends Model
 			$builder->groupBy($this->table . '.' . $this->primaryKey);
 		}
 
-		// Search when UUID6 is used as primary key
-		if (empty($builder->QBOrderBy) && in_array($this->primaryKey, $this->uuidFields) && $this->uuidUseBytes === false && $this->uuidVersion === 'uuid6')	
+		// Search when UUID6 or UUID7 is used as primary key
+		if (empty($builder->QBOrderBy) && in_array($this->primaryKey, $this->uuidFields) && $this->uuidUseBytes === false && in_array($this->uuidVersion, ['uuid6', 'uuid7']))
 		{
 			$builder->orderBy($this->table . '.' . $this->primaryKey, 'asc');
 		}
