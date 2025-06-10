@@ -169,13 +169,13 @@ class Uuid
 	}
 
     /**
-     * Creates a representation from the provided value.
+     * From string or byte string to UUID object
      *
      * @param string $value The input value, which can be either a printable string or raw bytes.
      *
      * @return \Ramsey\Uuid\UuidInterface UUID interface.
      */
-    public function fromValue(string $value)
+    public function fromValue(string $value) : \Ramsey\Uuid\UuidInterface
     {
         if (ctype_print($value) === true)
         {
