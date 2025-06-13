@@ -168,6 +168,22 @@ class Uuid
 		return RamseyUuid::fromBytes($bytes);
 	}
 
+    /**
+     * From string or byte string to UUID object
+     *
+     * @param string $value The input value, which can be either a printable string or raw bytes.
+     *
+     * @return \Ramsey\Uuid\UuidInterface UUID interface.
+     */
+    public function fromValue(string $value) : \Ramsey\Uuid\UuidInterface
+    {
+        if (ctype_print($value) === true)
+        {
+            return $this->fromString($value);
+        }
+        return $this->fromBytes($value);
+    }
+
 	/**
 	 * From 128-bit integer string to UUID object
 	 *

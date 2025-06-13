@@ -128,7 +128,7 @@ class UuidModel extends Model
 					continue;
 				}
 
-				$row[$field] = $this->uuid->fromBytes($row[$field])->toString();
+				$row[$field] = $this->uuid->fromValue($row[$field])->toString();
 			}
 			else
 			{
@@ -137,7 +137,7 @@ class UuidModel extends Model
 					continue;
 				}
 
-				$row->{$field} = $this->uuid->fromBytes($row->{$field})->toString();
+				$row->{$field} = $this->uuid->fromValue($row->{$field})->toString();
 			}
 		}
 
@@ -162,12 +162,12 @@ class UuidModel extends Model
 		{
 			foreach ($key as &$val)
 			{
-				$val = $this->uuid->fromString($val)->getBytes();
+				$val = $this->uuid->fromValue($val)->getBytes();
 			}
 		}
 		elseif (! empty($key))
 		{
-			$key = $this->uuid->fromString($key)->getBytes();
+			$key = $this->uuid->fromValue($key)->getBytes();
 		}
 
 		return $key;
@@ -221,7 +221,7 @@ class UuidModel extends Model
 				continue;
 			}
 
-			$row[$field] = $this->uuid->fromString($row[$field])->getBytes();
+			$row[$field] = $this->uuid->fromValue($row[$field])->getBytes();
 		}
 
 		return $row;
@@ -381,7 +381,7 @@ class UuidModel extends Model
 			// Convert UUID fields if needed
 			if ($val && in_array($key, $this->uuidFields) && $this->uuidUseBytes === true)
 			{
-				$val = ($this->uuid->fromString($val))->getBytes();
+				$val = ($this->uuid->fromValue($val))->getBytes();
 			}
 			
 			$builder->set($key, $val, $escape[$key] ?? null);
@@ -456,7 +456,7 @@ class UuidModel extends Model
 						{
 							if ($this->uuidUseBytes === true && ! empty($row[$field]))
 							{
-								$row[$field] = ($this->uuid->fromString($row[$field]))->getBytes();
+								$row[$field] = ($this->uuid->fromValue($row[$field]))->getBytes();
 							}
 						}
 					}
@@ -495,7 +495,7 @@ class UuidModel extends Model
 			// Convert UUID fields if needed
 			if ($val && in_array($key, $this->uuidFields) && $this->uuidUseBytes === true)
 			{
-				$val = ($this->uuid->fromString($val))->getBytes();
+				$val = ($this->uuid->fromValue($val))->getBytes();
 			}
 
 			$builder->set($key, $val, $escape[$key] ?? null);
@@ -528,7 +528,7 @@ class UuidModel extends Model
 				{
 					if (! empty($row[$field]))
 					{
-						$row[$field] = ($this->uuid->fromString($row[$field]))->getBytes();
+						$row[$field] = ($this->uuid->fromValue($row[$field]))->getBytes();
 					}
 				}
 			}
