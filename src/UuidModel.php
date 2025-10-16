@@ -48,10 +48,10 @@ class UuidModel extends Model
 	/**
 	 * Model constructor.
 	 *
-	 * @param ConnectionInterface $db
-	 * @param ValidationInterface $validation
+	 * @param ConnectionInterface|null $db
+	 * @param ValidationInterface|null $validation
 	 */
-	public function __construct(ConnectionInterface &$db = null, ValidationInterface $validation = null)
+	public function __construct(?ConnectionInterface &$db = null, ?ValidationInterface $validation = null)
 	{
 		// We have to ensure that uuidVersion is set correctly
 		if (! in_array($this->uuidVersion, config('Uuid')->supportedVersions))
@@ -279,12 +279,12 @@ class UuidModel extends Model
 	 * all results, while optionally limiting them.
 	 * This methods works only with dbCalls
 	 *
-	 * @param integer $limit  Limit
+	 * @param integer|null $limit  Limit
 	 * @param integer $offset Offset
 	 *
 	 * @return array
 	 */
-	protected function doFindAll(int $limit = null, int $offset = 0)
+	protected function doFindAll(?int $limit = null, int $offset = 0)
 	{
 		$result = parent::doFindAll($limit, $offset);
 		// Convert UUID fields from byte if needed
@@ -517,7 +517,7 @@ class UuidModel extends Model
 	 *
 	 * @throws DatabaseException
 	 */
-	protected function doUpdateBatch(array $set = null, string $index = null, int $batchSize = 100, bool $returnSQL = false)
+	protected function doUpdateBatch(?array $set = null, ?string $index = null, int $batchSize = 100, bool $returnSQL = false)
 	{
 		foreach ($set as &$row)
 		{
