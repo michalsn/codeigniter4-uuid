@@ -1,48 +1,67 @@
 {
-  "name": "michalsn/codeigniter4-uuid",
-  "description": "UUID package for CodeIgniter 4 with support for Model and Entity.",
-  "keywords": [
-      "codeigniter4", "uuid", "model", "entity"
-  ],
-  "homepage": "https://github.com/michalsn/codeigniter4-uuid",
-  "authors": [
-    {
-      "name": "michalsn",
-      "homepage": "https://github.com/michalsn",
-      "role": "Developer"
+    "name": "michalsn/codeigniter4-uuid",
+    "description": "UUID and ULID package for CodeIgniter 4 with support for Model.",
+    "license": "MIT",
+    "type": "library",
+    "keywords": ["codeigniter", "codeigniter4", "uuid", "ulid", "model"],
+    "authors": [
+        {
+            "name": "michalsn",
+            "homepage": "https://github.com/michalsn",
+            "role": "Developer"
+        }
+    ],
+    "homepage": "https://github.com/michalsn/codeigniter-uuid",
+    "require": {
+        "php": "^8.2",
+        "ext-ctype": "*",
+        "symfony/uid": "^7.2"
+    },
+    "require-dev": {
+        "codeigniter4/devkit": "^1.3",
+        "codeigniter4/framework": "^4.5"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Michalsn\\CodeIgniterUuid\\": "src"
+        },
+        "exclude-from-classmap": [
+            "**/Database/Migrations/**"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
+    },
+    "scripts": {
+        "analyze": [
+            "phpstan analyze",
+            "psalm",
+            "rector process --dry-run"
+        ],
+        "sa": "@analyze",
+        "ci": [
+            "Composer\\Config::disableProcessTimeout",
+            "@cs",
+            "@deduplicate",
+            "@inspect",
+            "@analyze",
+            "@test"
+        ],
+        "cs": "php-cs-fixer fix --ansi --verbose --dry-run --diff",
+        "cs-fix": "php-cs-fixer fix --ansi --verbose --diff",
+        "style": "@cs-fix",
+        "deduplicate": "phpcpd src/ tests/",
+        "inspect": "deptrac analyze --cache-file=build/deptrac.cache",
+        "mutate": "infection --threads=2 --skip-initial-tests --coverage=build/phpunit",
+        "test": "phpunit"
     }
-  ],
-  "license": "MIT",
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/codeigniter4/CodeIgniter4"
-    }
-  ],
-  "require": {
-    "php": ">=8.1",
-    "ramsey/uuid": "^4.7",
-    "ext-ctype": "*"
-  },
-  "minimum-stability": "dev",
-  "require-dev": {
-    "phpunit/phpunit" : "8.5.*",
-    "codeigniter4/codeigniter4": "dev-develop"
-  },
-  "autoload": {
-    "psr-4": {
-      "Michalsn\\Uuid\\": "src"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Tests\\Support\\": "tests/_support"
-    }
-  },
-  "scripts": {
-    "test": "vendor/bin/phpunit",
-    "post-update-cmd": [
-      "@composer dump-autoload"
-    ]
-  }
 }

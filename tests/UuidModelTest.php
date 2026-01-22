@@ -1,493 +1,426 @@
 <?php
 
-use CodeIgniter\Test\CIUnitTestCase;
-use CodeIgniter\Test\DatabaseTestTrait;
-use Michalsn\Uuid\Uuid;
-use Tests\Support\Project1Model;
-use Tests\Support\Project2Model;
+declare(strict_types=1);
 
-class UuidModelTest extends CIUnitTestCase
+namespace Tests;
+
+use CodeIgniter\Test\DatabaseTestTrait;
+use Tests\Support\Models\Project1Model;
+use Tests\Support\Models\Project2Model;
+use Tests\Support\Models\Project3Model;
+use Tests\Support\Models\Project4Model;
+use Tests\Support\TestCase;
+
+/**
+ * @internal
+ */
+final class UuidModelTest extends TestCase
 {
     use DatabaseTestTrait;
-    
-    protected $refresh   = true;
-    protected $seed      = 'Tests\Support\Database\Seeds\UuidSeeder';
-    protected $basePath  = SUPPORTPATH . 'Database/';
-    protected $namespace = 'Tests\Support';
 
-    // Projects1
-    public function testInsertWithUuidPrimaryKey()
+    protected $refresh = true;
+    protected $namespace;
+
+    public function testInsertWithUuidPrimaryKeyString()
     {
-        $projectModel = new Project1Model();
-        
+        $model = model(Project1Model::class);
+
         $data = [
-            'name' => 'Sample name',
-            'description' => 'Sample description',
+            'name'        => 'Test Project',
+            'description' => 'Test Description',
         ];
 
-        $projectId = $projectModel->insert($data);
+        $id = $model->insert($data);
 
-        $result = $projectModel->find($projectId);
-        unset($result['created_at'], $result['updated_at'], $result['deleted_at']);
+        $this->assertIsString($id);
+        $this->assertSame(36, strlen($id));
 
-        $expected = [
-            'id' => $projectId,
-            'name' => $data['name'],
-            'description' => $data['description'],
-        ];
-
-        $this->assertEquals($expected, $result);
+        $this->seeInDatabase('projects1', [
+            'id'          => $id,
+            'name'        => 'Test Project',
+            'description' => 'Test Description',
+        ]);
     }
 
-    public function testUpdateWithUuidPrimaryKey()
+    public function testInsertWithUuidPrimaryKeyBytes()
     {
-        $projectModel = new Project1Model();
-        $config = new \Michalsn\Uuid\Config\Uuid();
-        $uuid = new Uuid($config);
+        $model = model(Project3Model::class);
 
-        $row = $projectModel->update('c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394', ['name' => 'updated']);
-
-        $expected = [
-            'id'           => $uuid->fromString('c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394')->getBytes(),
-            'name'         => 'updated',
-            'description'  => 'Description 1',
+        $data = [
+            'name'        => 'Test Project Bytes',
+            'description' => 'Test Description Bytes',
         ];
 
-        $this->seeInDatabase('projects1', $expected);
+        $id = $model->insert($data);
+
+        $this->assertIsString($id);
+        $this->assertSame(36, strlen($id));
+
+        // The ID should be converted back to string for return
+        $project = $model->find($id);
+        $this->assertIsArray($project);
+        $this->assertSame('Test Project Bytes', $project['name']);
     }
 
-    public function testDeleteWithUuidPrimaryKey()
+    public function testFindWithUuidPrimaryKeyString()
     {
-        $projectModel = new Project1Model();
-        $config = new \Michalsn\Uuid\Config\Uuid();
-        $uuid = new Uuid($config);
+        $model = model(Project1Model::class);
 
-        $row = $projectModel->delete('c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394');
+        $id = $model->insert([
+            'name'        => 'Find Test',
+            'description' => 'Find Description',
+        ]);
 
-        $expected1 = [
-            'id' => $uuid->fromString('c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394')->getBytes(),
-            'deleted_at' => null,
-        ];
+        $project = $model->find($id);
 
-        $expected2 = [
-            'id' => $uuid->fromString('c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394')->getBytes(),
-        ];
-
-        $this->dontSeeInDatabase('projects1', $expected1);
-        $this->seeInDatabase('projects1', $expected2);
+        $this->assertIsArray($project);
+        $this->assertSame($id, $project['id']);
+        $this->assertSame('Find Test', $project['name']);
     }
 
-    public function testDeleteWithoutSoftDeleteWithUuidPrimaryKey()
+    public function testFindWithUuidPrimaryKeyBytes()
     {
-        $projectModel = new Project1Model();
-        $config = new \Michalsn\Uuid\Config\Uuid();
-        $uuid = new Uuid($config);
+        $model = model(Project3Model::class);
 
-        $this->setPrivateProperty($projectModel, 'useSoftDeletes', false);
+        $id = $model->insert([
+            'name'        => 'Find Test Bytes',
+            'description' => 'Find Description Bytes',
+        ]);
 
-        $row = $projectModel->delete('c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394');
+        $project = $model->find($id);
 
-        $expected = [
-            'id' => $uuid->fromString('c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394')->getBytes(),
-        ];
-
-        $this->dontSeeInDatabase('projects1', $expected);
-    }
-
-    public function testFindWithUuidPrimaryKey()
-    {
-        $projectModel = new Project1Model();
-
-        $row = $projectModel->find('c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394');
-
-        $expected = [
-            'id'           => 'c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394',
-            'name'         => 'Name 1',
-            'description'  => 'Description 1',
-        ];
-
-        unset($row['created_at'], $row['updated_at'], $row['deleted_at']);
-
-        $this->assertEquals($expected, $row);
+        $this->assertIsArray($project);
+        $this->assertSame($id, $project['id']);
+        $this->assertSame('Find Test Bytes', $project['name']);
     }
 
     public function testFindAllWithUuidPrimaryKey()
     {
-        $projectModel = new Project1Model();
+        $model = model(Project1Model::class);
 
-        $results = $projectModel->orderBy('created_at')->findAll();
+        $model->insert([
+            'name'        => 'Project 1',
+            'description' => 'Description 1',
+        ]);
 
-        $expected = [
-            [
-                'id'           => 'c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394',
-                'name'         => 'Name 1',
-                'description'  => 'Description 1',
-            ],
-            [
-                'id'           => 'c2912425-c3aa-7774-4dc2-aac28654c3a1',
-                'name'         => 'Name 2',
-                'description'  => 'Description 2',
-            ],
-            [
-                'id'           => 'c38ac295-c2b9-c384-c398-c28a4416c2b5',
-                'name'         => 'Name 3',
-                'description'  => 'Description 3',
-            ],
-        ];
+        $model->insert([
+            'name'        => 'Project 2',
+            'description' => 'Description 2',
+        ]);
 
-        foreach ($results as &$row)
-        {
-            unset($row['created_at'], $row['updated_at'], $row['deleted_at']);
-        }
+        $projects = $model->findAll();
 
-        $this->assertEquals($expected, $results);
+        $this->assertCount(2, $projects);
+        $this->assertIsArray($projects[0]);
+        $this->assertArrayHasKey('id', $projects[0]);
+        $this->assertSame(36, strlen((string) $projects[0]['id']));
     }
 
-    public function testFirstWithUuidPrimaryKey()
+    public function testFindMultipleWithUuidPrimaryKey()
     {
-        $projectModel = new Project1Model();
+        $model = model(Project1Model::class);
 
-        $row = $projectModel->first();
+        $id1 = $model->insert([
+            'name'        => 'Project 1',
+            'description' => 'Description 1',
+        ]);
 
-        $expected = [
-            'id'           => 'c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394',
-            'name'         => 'Name 1',
-            'description'  => 'Description 1',
-        ];
+        $id2 = $model->insert([
+            'name'        => 'Project 2',
+            'description' => 'Description 2',
+        ]);
 
-        unset($row['created_at'], $row['updated_at'], $row['deleted_at']);
+        $projects = $model->find([$id1, $id2]);
 
-        $this->assertEquals($expected, $row);
+        $this->assertCount(2, $projects);
+        $this->assertSame($id1, $projects[0]['id']);
+        $this->assertSame($id2, $projects[1]['id']);
+    }
+
+    public function testUpdateWithUuidPrimaryKeyString()
+    {
+        $model = model(Project1Model::class);
+
+        $id = $model->insert([
+            'name'        => 'Original Name',
+            'description' => 'Original Description',
+        ]);
+
+        $result = $model->update($id, [
+            'name' => 'Updated Name',
+        ]);
+
+        $this->assertTrue($result);
+
+        $this->seeInDatabase('projects1', [
+            'id'   => $id,
+            'name' => 'Updated Name',
+        ]);
+    }
+
+    public function testUpdateWithUuidPrimaryKeyBytes()
+    {
+        $model = model(Project3Model::class);
+
+        $id = $model->insert([
+            'name'        => 'Original Name Bytes',
+            'description' => 'Original Description Bytes',
+        ]);
+
+        $result = $model->update($id, [
+            'name' => 'Updated Name Bytes',
+        ]);
+
+        $this->assertTrue($result);
+
+        $project = $model->find($id);
+
+        $this->assertSame('Updated Name Bytes', $project['name']);
+    }
+
+    public function testSoftDeleteWithUuidPrimaryKey()
+    {
+        $model = model(Project1Model::class);
+
+        $id = $model->insert([
+            'name'        => 'To Delete',
+            'description' => 'To Delete Description',
+        ]);
+
+        $result = $model->delete($id);
+
+        $this->assertTrue($result);
+
+        // Should not find it by default
+        $project = $model->find($id);
+        $this->assertNull($project);
+
+        // Should find it with withDeleted()
+        $project = $model->withDeleted()->find($id);
+        $this->assertIsArray($project);
+        $this->assertNotNull($project['deleted_at']);
+    }
+
+    public function testHardDeleteWithUuidPrimaryKey()
+    {
+        $model = model(Project1Model::class);
+
+        $id = $model->insert([
+            'name'        => 'To Hard Delete',
+            'description' => 'To Hard Delete Description',
+        ]);
+
+        $result = $model->delete($id, true);
+
+        $this->assertTrue($result);
+
+        // Should not find it even with withDeleted()
+        $project = $model->withDeleted()->find($id);
+        $this->assertNull($project);
     }
 
     public function testInsertBatchWithUuidPrimaryKey()
     {
-        $projectModel = new Project1Model();
+        $model = model(Project1Model::class);
 
-        $inserts = [
-            [
-                'name'         => 'Name 4',
-                'description'  => 'Description 4',
-            ],
-            [
-                'name'         => 'Name 5',
-                'description'  => 'Description 5',
-            ],
-            [
-                'name'         => 'Name 6',
-                'description'  => 'Description 6',
-            ],
-        ];
-
-        $results = $projectModel->insertBatch($inserts);
-
-        $this->assertEquals(3, $results);
-
-        $this->seeNumRecords(6, 'projects1', ['deleted_at' => null]);
-    }
-
-    public function testUpdateBatchWithUuidPrimaryKey()
-    {
-        $projectModel = new Project1Model();
-
-        $updates = [
-            [
-                'id'           => 'c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394',
-                'name'         => 'Name 1 updated',
-                'description'  => 'Description 1',
-            ],
-            [
-                'id'           => 'c2912425-c3aa-7774-4dc2-aac28654c3a1',
-                'name'         => 'Name 2 updated',
-                'description'  => 'Description 2',
-            ],
-            [
-                'id'           => 'c38ac295-c2b9-c384-c398-c28a4416c2b5',
-                'name'         => 'Name 3 updated',
-                'description'  => 'Description 3',
-            ],
-        ];
-
-        $results = $projectModel->updateBatch($updates, 'id');
-
-        $this->assertEquals(3, $results);
-
-        $this->seeInDatabase('projects1', ['name' => 'Name 1 updated']);
-        $this->seeInDatabase('projects1', ['name' => 'Name 2 updated']);
-        $this->seeInDatabase('projects1', ['name' => 'Name 3 updated']);
-    }
-
-    // Projects2
-    public function testInsertWithoutUuidPrimaryKey()
-    {
-        $projectModel = new Project2Model();
-        
         $data = [
-            'category_id' => 'c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394',
-            'name' => 'Sample name',
-            'description' => 'Sample description',
-        ];
-
-        $projectId = $projectModel->insert($data);
-
-        $result = $projectModel->find($projectId);
-        unset($result['created_at'], $result['updated_at'], $result['deleted_at']);
-
-        $expected = [
-            'id' => (string) $projectId,
-            'category_id' => 'c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394',
-            'name' => $data['name'],
-            'description' => $data['description'],
-        ];
-
-        $this->assertEquals($expected, $result);
-    }
-
-    public function testUpdateWithoutUuidPrimaryKey()
-    {
-        $projectModel = new Project2Model();
-        $config = new \Michalsn\Uuid\Config\Uuid();
-        $uuid = new Uuid($config);
-
-        $row = $projectModel->update(1, [
-            'name' => 'updated', 'category_id' => 'c2912425-c3aa-7774-4dc2-aac28654c3a1'
-        ]);
-
-        $expected = [
-            'id'           => '1',
-            'category_id'  => $uuid->fromString('c2912425-c3aa-7774-4dc2-aac28654c3a1')->getBytes(),
-            'name'         => 'updated',
-            'description'  => 'Description 1',
-        ];
-
-        $this->seeInDatabase('projects2', $expected);
-    }
-
-    public function testInsertNullWithoutUuidPrimaryKey()
-    {
-        $projectModel = new Project2Model();
-        
-        $data = [
-            'category_id' => null,
-            'name' => 'Sample name',
-            'description' => 'Sample description',
-        ];
-
-        $projectId = $projectModel->insert($data);
-
-        $result = $projectModel->find($projectId);
-        unset($result['created_at'], $result['updated_at'], $result['deleted_at']);
-
-        $expected = [
-            'id' => (string) $projectId,
-            'category_id' => null,
-            'name' => $data['name'],
-            'description' => $data['description'],
-        ];
-
-        $this->assertEquals($expected, $result);
-    }
-
-    public function testUpdateNullWithoutUuidPrimaryKey()
-    {
-        $projectModel = new Project2Model();
-        $config = new \Michalsn\Uuid\Config\Uuid();
-        $uuid = new Uuid($config);
-
-        $row = $projectModel->update(1, [
-            'name' => 'updated', 'category_id' => null
-        ]);
-
-        $expected = [
-            'id'           => '1',
-            'category_id'  => null,
-            'name'         => 'updated',
-            'description'  => 'Description 1',
-        ];
-
-        $this->seeInDatabase('projects2', $expected);
-    }
-
-    public function testDeleteWithoutUuidPrimaryKey()
-    {
-        $projectModel = new Project2Model();
-        $config = new \Michalsn\Uuid\Config\Uuid();
-        $uuid = new Uuid($config);
-
-        $row = $projectModel->delete(1);
-
-        $expected1 = [
-            'id'          => '1',
-            'category_id' => $uuid->fromString('c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394')->getBytes(),
-            'deleted_at'  => null,
-        ];
-
-        $expected2 = [
-            'category_id' => $uuid->fromString('c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394')->getBytes(),
-        ];
-
-        $this->dontSeeInDatabase('projects2', $expected1);
-        $this->seeInDatabase('projects2', $expected2);
-    }
-
-    public function testDeleteWithoutSoftDeleteWithoutUuidPrimaryKey()
-    {
-        $projectModel = new Project2Model();
-
-        $this->setPrivateProperty($projectModel, 'useSoftDeletes', false);
-
-        $row = $projectModel->delete(1);
-
-        $expected = [
-            'id' => 1,
-        ];
-
-        $this->dontSeeInDatabase('projects2', $expected);
-    }
-
-    public function testFindWithoutUuidPrimaryKey()
-    {
-        $projectModel = new Project2Model();
-
-        $row = $projectModel->find(1);
-
-        $expected = [
-            'id'           => '1',
-            'category_id'  => 'c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394',
-            'name'         => 'Name 1',
-            'description'  => 'Description 1',
-        ];
-
-        unset($row['created_at'], $row['updated_at'], $row['deleted_at']);
-
-        $this->assertEquals($expected, $row);
-    }
-
-    public function testFindAllWithoutUuidPrimaryKey()
-    {
-        $projectModel = new Project2Model();
-
-        $results = $projectModel->orderBy('created_at')->findAll();
-
-        $expected = [
             [
-                'id'           => '1',
-                'category_id'  => 'c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394',
-                'name'         => 'Name 1',
-                'description'  => 'Description 1',
+                'name'        => 'Batch Project 1',
+                'description' => 'Batch Description 1',
             ],
             [
-                'id'           => '2',
-                'category_id'  => 'c2912425-c3aa-7774-4dc2-aac28654c3a1',
-                'name'         => 'Name 2',
-                'description'  => 'Description 2',
+                'name'        => 'Batch Project 2',
+                'description' => 'Batch Description 2',
             ],
             [
-                'id'           => '3',
-                'category_id'  => 'c38ac295-c2b9-c384-c398-c28a4416c2b5',
-                'name'         => 'Name 3',
-                'description'  => 'Description 3',
+                'name'        => 'Batch Project 3',
+                'description' => 'Batch Description 3',
             ],
         ];
 
-        foreach ($results as &$row)
-        {
-            unset($row['created_at'], $row['updated_at'], $row['deleted_at']);
+        $result = $model->insertBatch($data);
+
+        $this->assertSame(3, $result);
+
+        $projects = $model->findAll();
+        $this->assertCount(3, $projects);
+
+        // All should have UUIDs
+        foreach ($projects as $project) {
+            $this->assertSame(36, strlen((string) $project['id']));
         }
-
-        $this->assertEquals($expected, $results);
     }
 
-    public function testFirstWithoutUuidPrimaryKey()
+    public function testInsertBatchWithUuidPrimaryKeyBytes()
     {
-        $projectModel = new Project2Model();
+        $model = model(Project3Model::class);
 
-        $row = $projectModel->first();
-
-        $expected = [
-            'id'           => '1',
-            'category_id'  => 'c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394',
-            'name'         => 'Name 1',
-            'description'  => 'Description 1',
-        ];
-
-        unset($row['created_at'], $row['updated_at'], $row['deleted_at']);
-
-        $this->assertEquals($expected, $row);
-    }
-
-    public function testInsertBatchWithoutUuidPrimaryKey()
-    {
-        $projectModel = new Project2Model();
-
-        $inserts = [
+        $data = [
             [
-                'category_id'  => 'c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394',
-                'name'         => 'Name 4',
-                'description'  => 'Description 4',
+                'name'        => 'Batch Bytes 1',
+                'description' => 'Batch Bytes Description 1',
             ],
             [
-                'category_id'  => 'c2912425-c3aa-7774-4dc2-aac28654c3a1',
-                'name'         => 'Name 5',
-                'description'  => 'Description 5',
-            ],
-            [
-                'category_id'  => 'c38ac295-c2b9-c384-c398-c28a4416c2b5',
-                'name'         => 'Name 6',
-                'description'  => 'Description 6',
+                'name'        => 'Batch Bytes 2',
+                'description' => 'Batch Bytes Description 2',
             ],
         ];
 
-        $results = $projectModel->insertBatch($inserts);
+        $result = $model->insertBatch($data);
 
-        $this->assertEquals(3, $results);
+        $this->assertSame(2, $result);
 
-        $this->seeNumRecords(6, 'projects2', ['deleted_at' => null]);
+        $projects = $model->findAll();
+        $this->assertCount(2, $projects);
+
+        // All should have UUIDs converted to string format
+        foreach ($projects as $project) {
+            $this->assertSame(36, strlen((string) $project['id']));
+        }
     }
 
-    public function testUpdateBatchWithoutUuidPrimaryKey()
+    public function testUuidOnCustomFieldString()
     {
-        $projectModel = new Project2Model();
-        $config = new \Michalsn\Uuid\Config\Uuid();
-        $uuid = new Uuid($config);
+        $model = model(Project2Model::class);
 
-        $updates = [
-            [
-                'id'           => '1',
-                'category_id'  => 'c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394',
-                'name'         => 'Name 1 updated',
-                'description'  => 'Description 1',
-            ],
-            [
-                'id'           => '2',
-                'category_id'  => 'c2912425-c3aa-7774-4dc2-aac28654c3a1',
-                'name'         => 'Name 2 updated',
-                'description'  => 'Description 2',
-            ],
-            [
-                'id'           => '3',
-                'category_id'  => 'c38ac295-c2b9-c384-c398-c28a4416c2b5',
-                'name'         => 'Name 3 updated',
-                'description'  => 'Description 3',
-            ],
+        $data = [
+            'category_id' => service('uuid')->generate('v4')->toString(),
+            'name'        => 'Custom Field Test',
+            'description' => 'Custom Field Description',
         ];
 
-        $results = $projectModel->updateBatch($updates, 'id');
+        $id = $model->insert($data);
 
-        $this->assertEquals(3, $results);
+        $this->assertIsInt($id);
 
-        $this->seeInDatabase('projects2', [
-            'name' => 'Name 1 updated', 
-            'category_id' => $uuid->fromString('c2b8c2a8-2fc3-a2c3-bf22-4d2ec2b6c394')->getBytes(),
-        ]);
-        $this->seeInDatabase('projects2', [
-            'name' => 'Name 2 updated', 
-            'category_id' => $uuid->fromString('c2912425-c3aa-7774-4dc2-aac28654c3a1')->getBytes(),
-        ]);
-        $this->seeInDatabase('projects2', [
-            'name' => 'Name 3 updated', 
-            'category_id' => $uuid->fromString('c38ac295-c2b9-c384-c398-c28a4416c2b5')->getBytes(),
+        $project = $model->find($id);
+        $this->assertSame($data['category_id'], $project['category_id']);
+        $this->assertSame(36, strlen((string) $project['category_id']));
+    }
+
+    public function testUuidOnCustomFieldBytes()
+    {
+        $model = model(Project4Model::class);
+
+        $categoryId = service('uuid')->generate('v7')->toString();
+        $data       = [
+            'category_id' => $categoryId,
+            'name'        => 'Custom Field Bytes Test',
+            'description' => 'Custom Field Bytes Description',
+        ];
+
+        $id = $model->insert($data);
+
+        $this->assertIsInt($id);
+
+        $project = $model->find($id);
+        $this->assertSame($categoryId, $project['category_id']);
+        $this->assertSame(36, strlen((string) $project['category_id']));
+    }
+
+    public function testValidationFailure()
+    {
+        $model = model(Project1Model::class);
+
+        $data = [
+            'name'        => 'AB', // Too short (min_length is 3)
+            'description' => '',   // Required
+        ];
+
+        $result = $model->insert($data);
+
+        $this->assertFalse($result);
+
+        $errors = $model->errors();
+        $this->assertNotEmpty($errors);
+        $this->assertArrayHasKey('name', $errors);
+        $this->assertArrayHasKey('description', $errors);
+    }
+
+    public function testSaveMethodWithUuidPrimaryKey()
+    {
+        $model = model(Project1Model::class);
+
+        // Insert via save
+        $data = [
+            'name'        => 'Save Test',
+            'description' => 'Save Description',
+        ];
+
+        $result = $model->save($data);
+        $this->assertTrue($result);
+
+        // Update via save
+        $projects = $model->findAll();
+        $project  = $projects[0];
+        $id       = $project['id'];
+
+        $project['name'] = 'Updated via Save';
+        $result          = $model->save($project);
+
+        $this->assertTrue($result);
+
+        $this->seeInDatabase('projects1', [
+            'id'   => $id,
+            'name' => 'Updated via Save',
         ]);
     }
 
+    public function testFirstMethodReturnsOldestRecord()
+    {
+        $model = model(Project1Model::class);
+
+        $model->insert([
+            'name'        => 'First Project',
+            'description' => 'First Description',
+        ]);
+
+        sleep(1); // Ensure different timestamps
+
+        $model->insert([
+            'name'        => 'Second Project',
+            'description' => 'Second Description',
+        ]);
+
+        $project = $model->first();
+
+        $this->assertIsArray($project);
+        // For UUID v7 or with timestamps, first() should return the oldest
+        $this->assertSame('First Project', $project['name']);
+    }
+
+    public function testWhereWithUuidPrimaryKey()
+    {
+        $model = model(Project1Model::class);
+
+        $id = $model->insert([
+            'name'        => 'Where Test',
+            'description' => 'Where Description',
+        ]);
+
+        $project = $model->where('id', $id)->first();
+
+        $this->assertIsArray($project);
+        $this->assertSame($id, $project['id']);
+        $this->assertSame('Where Test', $project['name']);
+    }
+
+    public function testCountAllWithUuidPrimaryKey()
+    {
+        $model = model(Project1Model::class);
+
+        $model->insert([
+            'name'        => 'Count Test 1',
+            'description' => 'Count Description 1',
+        ]);
+
+        $model->insert([
+            'name'        => 'Count Test 2',
+            'description' => 'Count Description 2',
+        ]);
+
+        $count = $model->builder()->countAll();
+
+        $this->assertSame(2, $count);
+    }
 }

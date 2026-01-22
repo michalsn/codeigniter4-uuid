@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Michalsn\CodeIgniterUuid\Config;
+namespace Tests\Support\Config;
 
-use CodeIgniter\Config\BaseConfig;
+use Michalsn\CodeIgniterUuid\Config\Uuid as UuidConfig;
 use Michalsn\CodeIgniterUuid\Enums\UuidType;
 use Michalsn\CodeIgniterUuid\Enums\UuidVersion;
 use Symfony\Component\Uid\Uuid as SymfonyUuid;
 
-class Uuid extends BaseConfig
+class Uuid extends UuidConfig
 {
     public UuidVersion $defaultVersion = UuidVersion::V7;
     public UuidType $defaultType       = UuidType::STRING;
@@ -18,11 +18,11 @@ class Uuid extends BaseConfig
     ];
     public array $v3 = [
         'ns'   => SymfonyUuid::NAMESPACE_URL,
-        'name' => null,
+        'name' => 'https://example.com/',
     ];
     public array $v5 = [
         'ns'   => SymfonyUuid::NAMESPACE_URL,
-        'name' => null,
+        'name' => 'https://example.com/',
     ];
     public array $v6 = [
         'node' => null,

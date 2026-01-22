@@ -1,7 +1,12 @@
-<?php namespace Michalsn\Uuid\Config;
+<?php
+
+declare(strict_types=1);
+
+namespace Michalsn\CodeIgniterUuid\Config;
 
 use CodeIgniter\Config\BaseService;
-use Michalsn\Uuid\Uuid;
+use Michalsn\CodeIgniterUuid\Config\Uuid as UuidConfig;
+use Michalsn\CodeIgniterUuid\Uuid;
 
 class Services extends BaseService
 {
@@ -9,17 +14,17 @@ class Services extends BaseService
      * Generates and returns a new Uuid instance either as a shared instance or a new instance.
      *
      * @param bool $getShared Determines whether to return a shared instance of Uuid. Defaults to true.
+     *
      * @return Uuid Returns an instance of the Uuid class.
      */
-    public static function uuid(bool $getShared = true) : Uuid
+    public static function uuid(?UuidConfig $config = null, bool $getShared = true): Uuid
     {
-		if ($getShared)
-		{
-			return static::getSharedInstance('uuid');
-		}
+        if ($getShared) {
+            return static::getSharedInstance('uuid', $config);
+        }
 
-		$config = config('Uuid');
+        $config ??= config('Uuid');
 
-		return new Uuid($config);
-	}
+        return new Uuid($config);
+    }
 }

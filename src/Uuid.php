@@ -1,224 +1,131 @@
 <?php
 
-namespace Michalsn\Uuid;
+declare(strict_types=1);
 
-use DateTimeInterface;
-use Ramsey\Uuid\Type\Hexadecimal;
-use Ramsey\Uuid\Type\Integer as IntegerObject;
-use Ramsey\Uuid\Uuid as RamseyUuid;
+namespace Michalsn\CodeIgniterUuid;
 
-/**
- * Simple wrapper around Ramsey\Uuid class.
- */
+use Michalsn\CodeIgniterUuid\Config\Uuid as UuidConfig;
+use Michalsn\CodeIgniterUuid\Enums\UuidVersion;
+use Michalsn\CodeIgniterUuid\Exceptions\CodeIgniterUuidException;
+use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid as SymfonyUuid;
+
 class Uuid
 {
-	/**
-	 * Config object.
-	 *
-	 * @var \Config\Uuid
-	 */
-	protected $config;
-
-	//--------------------------------------------------------------------
-
-	/**
-	 * Prepare config to use
-	 *
-	 * @param \Config\Uuid $config
-	 */
-	public function __construct($config)
-	{
-		$this->config = $config;
-	}
-
-	/**
-	 * UUID Version 1
-	 *
-	 * @param Hexadecimal|int|string|null $nodeProvider  A 48-bit number representing the hardware address; this number may be represented as an integer or a hexadecimal string
-     * @param int                         $clockSequence A 14-bit number used to help avoid duplicates that could arise when the clock is set backwards in time or if the node ID changes
-	 *
-	 * @return \Ramsey\Uuid\UuidInterface
-	 */
-	public function uuid1($nodeProvider = null, ?int $clockSequence = null)
-	{
-		return RamseyUuid::uuid1(
-			$nodeProvider ?? $this->config->uuid1['nodeProvider'], 
-			$clockSequence ?? $this->config->uuid1['clockSequence']
-		);
-	}
-
-	/**
-	 * UUID Version 2
-	 *
-	 * @param int                $localDomain     The local domain to use when generating bytes, according to DCE Security
-     * @param IntegerObject|null $localIdentifier The local identifier for the given domain; this may be a UID or GID on POSIX systems, if the local domain is person or group, or it may be a site-defined identifier if the local domain is org
-     * @param Hexadecimal|null   $node            A 48-bit number representing the hardware address
-     * @param int|null           $clockSequence   A 14-bit number used to help avoid duplicates that could arise when the clock is set backwards in time or if the node ID changes (in a version 2 UUID, the lower 8 bits of this number are replaced with the domain).
-	 *
-	 * @return \Ramsey\Uuid\UuidInterface
-	 */
-	public function uuid2(
-		int $localDomain, 
-		?IntegerObject $localIdentifier = null, 
-		?Hexadecimal $nodeProvider = null, 
-		?int $clockSequence = null)
-	{
-		return RamseyUuid::uuid2(
-			$localDomain ?? $this->config->uuid2['localDomain'],
-			$localIdentifier ?? $this->config->uuid2['localIdentifier'],
-			$nodeProvider ?? $this->config->uuid2['nodeProvider'],
-			$clockSequence ?? $this->config->uuid2['clockSequence']
-		);
-	}
-
-	/**
-	 * UUID Version 3
-	 *
-	 * @param string|UuidInterface $ns   The namespace (must be a valid UUID)
-     * @param string               $name The name to use for creating a UUID
-	 *
-	 * @return \Ramsey\Uuid\UuidInterface
-	 */
-	public function uuid3($ns, string $name)
-	{
-		return RamseyUuid::uuid3(
-			$ns ?? $this->config->uuid3['ns'],
-			$name ?? $this->config->uuid3['name']
-		);
-	}
-
-	/**
-	 * UUID Version 4
-	 *
-	 * @return \Ramsey\Uuid\UuidInterface
-	 */
-	public function uuid4()
-	{
-		return RamseyUuid::uuid4();
-	}
-
-	/**
-	 * UUID Version 5
-	 *
-	 * @param string|UuidInterface $ns   The namespace (must be a valid UUID)
-     * @param string               $name The name to use for creating a UUID
-	 *
-	 * @return \Ramsey\Uuid\UuidInterface
-	 */
-	public function uuid5($ns, string $name)
-	{
-		return RamseyUuid::uuid5(
-			$ns ?? $this->config->uuid5['ns'],
-			$name ?? $this->config->uuid5['name']
-		);
-	}
-
-	/**
-	 * UUID Version 6
-	 *
-	 * @param Hexadecimal|null $node          A 48-bit number representing the hardware address
-     * @param int              $clockSequence A 14-bit number used to help avoid duplicates that could arise when the clock is set backwards in time or if the node ID changes
-	 *
-	 * @return \Ramsey\Uuid\UuidInterface
-	 */
-	public function uuid6(
-		?Hexadecimal $nodeProvider = null,
-        ?int $clockSequence = null
-    )
-	{
-		return RamseyUuid::uuid6(
-			$nodeProvider ?? $this->config->uuid6['nodeProvider'], 
-			$clockSequence ?? $this->config->uuid6['clockSequence']
-		);
-	}
-
-    /**
-     * UUID Version 7
-     *
-     * @param \DateTimeImmutable|null $dateTimeImmutable    To use an existing date and time to generate a version 7 UUID, you may pass a \DateTimeInterface instance to the uuid7() method.
-     *
-     * @return \Ramsey\Uuid\UuidInterface
-     */
-    public function uuid7(?\DateTimeImmutable $dateTimeImmutable = null) : \Ramsey\Uuid\UuidInterface
+    public function __construct(private ?UuidConfig $config = null)
     {
-        return RamseyUuid::uuid7($dateTimeImmutable);
+        $this->config = $config ?? config('Uuid');
     }
 
-	/**
-	 * From string to UUID object
-	 *
-	 * @param string $uuid
-	 *
-	 * @return \Ramsey\Uuid\UuidInterface
-	 */
-	public function fromString(string $uuid)
-	{
-		return RamseyUuid::fromString($uuid);
-	}
-
-	/**
-	 * From byte string to UUID object
-	 *
-	 * @param string $bytes
-	 *
-	 * @return \Ramsey\Uuid\UuidInterface
-	 */
-	public function fromBytes(string $bytes)
-	{
-		return RamseyUuid::fromBytes($bytes);
-	}
-
-    /**
-     * From string or byte string to UUID object
-     *
-     * @param string $value The input value, which can be either a printable string or raw bytes.
-     *
-     * @return \Ramsey\Uuid\UuidInterface UUID interface.
-     */
-    public function fromValue(string $value) : \Ramsey\Uuid\UuidInterface
+    public function fromString(string $uuid): UuidWrapper
     {
-        if (ctype_print($value) === true)
-        {
+        // Check if it's a ULID format (26 chars, no hyphens, Crockford base32)
+        if (Ulid::isValid($uuid)) {
+            return new UuidWrapper(Ulid::fromString($uuid));
+        }
+
+        // Handle UUID without hyphens (32 hex chars)
+        if (strlen($uuid) === 32 && ctype_xdigit($uuid)) {
+            $uuid = sprintf(
+                '%s-%s-%s-%s-%s',
+                substr($uuid, 0, 8),
+                substr($uuid, 8, 4),
+                substr($uuid, 12, 4),
+                substr($uuid, 16, 4),
+                substr($uuid, 20, 12),
+            );
+        }
+
+        return new UuidWrapper(SymfonyUuid::fromString($uuid));
+    }
+
+    public function fromValue(string $value): UuidWrapper
+    {
+        if (ctype_print($value)) {
             return $this->fromString($value);
         }
-        return $this->fromBytes($value);
+
+        return new UuidWrapper(SymfonyUuid::fromBinary($value));
     }
 
-	/**
-	 * From 128-bit integer string to UUID object
-	 *
-	 * @param string $integer
-	 *
-	 * @return \Ramsey\Uuid\UuidInterface
-	 */
-	public function fromInteger(string $integer)
-	{
-		return RamseyUuid::fromInteger($integer);
-	}
-
-	/**
-	 * Creates a UUID from a DateTimeInterface instance
-	 *
-	 * @return \Ramsey\Uuid\UuidInterface
-	 */
-	public function fromDateTime(
-        DateTimeInterface $dateTime,
-        ?Hexadecimal $nodeProvider = null,
-        ?int $clockSequence = null
-    )
+    public function isValid(string $value): bool
     {
-    	return RamseyUuid::fromDateTime($dateTime, $nodeProvider, $clockSequence);
+        // Check if it's a valid ULID
+        if (Ulid::isValid($value)) {
+            return true;
+        }
+
+        // Handle UUID without hyphens (32 hex chars)
+        if (strlen($value) === 32 && ctype_xdigit($value)) {
+            $value = sprintf(
+                '%s-%s-%s-%s-%s',
+                substr($value, 0, 8),
+                substr($value, 8, 4),
+                substr($value, 12, 4),
+                substr($value, 16, 4),
+                substr($value, 20, 12),
+            );
+        }
+
+        return SymfonyUuid::isValid($value);
     }
 
-    /**
-     * Is valid UUID
-     *
-     * @param string $uuid
-     *
-     * @return bool
-     */
-    public function isValid(string $uuid)
+    public function generate(string|UuidVersion|null $version = null): UuidWrapper
     {
-    	return RamseyUuid::isValid($uuid);
+        if ($version === null) {
+            $version = $this->config->defaultVersion;
+        } elseif (is_string($version)) {
+            $version = UuidVersion::tryFrom($version)
+                ?? throw CodeIgniterUuidException::forUnsupportedUuidVersion($version);
+        }
+
+        return match ($version) {
+            UuidVersion::V1   => $this->uuid1(),
+            UuidVersion::V3   => $this->uuid3(),
+            UuidVersion::V4   => $this->uuid4(),
+            UuidVersion::V5   => $this->uuid5(),
+            UuidVersion::V6   => $this->uuid6(),
+            UuidVersion::V7   => $this->uuid7(),
+            UuidVersion::ULID => $this->ulid(),
+        };
+    }
+
+    public function uuid1(): UuidWrapper
+    {
+        return new UuidWrapper(SymfonyUuid::v1());
+    }
+
+    public function uuid3(): UuidWrapper
+    {
+        $namespace = SymfonyUuid::fromString($this->config->v3['ns']);
+
+        return new UuidWrapper(SymfonyUuid::v3($namespace, $this->config->v3['name'] ?? ''));
+    }
+
+    public function uuid4(): UuidWrapper
+    {
+        return new UuidWrapper(SymfonyUuid::v4());
+    }
+
+    public function uuid5(): UuidWrapper
+    {
+        $namespace = SymfonyUuid::fromString($this->config->v5['ns']);
+
+        return new UuidWrapper(SymfonyUuid::v5($namespace, $this->config->v5['name'] ?? ''));
+    }
+
+    public function uuid6(): UuidWrapper
+    {
+        return new UuidWrapper(SymfonyUuid::v6());
+    }
+
+    public function uuid7(): UuidWrapper
+    {
+        return new UuidWrapper(SymfonyUuid::v7());
+    }
+
+    public function ulid(): UuidWrapper
+    {
+        return new UuidWrapper(new Ulid());
     }
 }
