@@ -1,0 +1,88 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Instanceof between int\|string and CodeIgniter\\Database\\RawSql will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: tests/HasUuidTraitTest.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: tests/HasUuidTraitTest.php
+
+		-
+			message: '''
+				#^Call to deprecated method getBytes\(\) of class Michalsn\\CodeIgniterUuid\\UuidWrapper\:
+				Use toBinary\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: tests/UuidTest.php
+
+		-
+			message: '''
+				#^Call to deprecated method getHex\(\) of class Michalsn\\CodeIgniterUuid\\UuidWrapper\:
+				Use toHex\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: tests/UuidTest.php
+
+		-
+			message: '''
+				#^Call to deprecated method toString\(\) of class Michalsn\\CodeIgniterUuid\\UuidWrapper\:
+				Use toRfc4122\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: tests/UuidTest.php
+
+		-
+			message: '#^Instanceof between int\|string and CodeIgniter\\Database\\RawSql will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: tests/_support/Models/Project1Model.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: tests/_support/Models/Project1Model.php
+
+		-
+			message: '#^Instanceof between int\|string and CodeIgniter\\Database\\RawSql will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: tests/_support/Models/Project2Model.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: tests/_support/Models/Project2Model.php
+
+		-
+			message: '#^Instanceof between int\|string and CodeIgniter\\Database\\RawSql will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: tests/_support/Models/Project3Model.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: tests/_support/Models/Project3Model.php
+
+		-
+			message: '#^Instanceof between int\|string and CodeIgniter\\Database\\RawSql will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: tests/_support/Models/Project4Model.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: tests/_support/Models/Project4Model.php
