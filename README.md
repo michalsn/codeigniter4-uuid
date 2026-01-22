@@ -44,17 +44,7 @@ class Uuid extends BaseUuid
     // Default storage type: STRING (36 chars) or BYTES (16 bytes binary)
     public UuidType $defaultType = UuidType::STRING;
 
-    // UUID v3 configuration (namespace-based, MD5)
-    public array $v3 = [
-        'ns'   => SymfonyUuid::NAMESPACE_URL,
-        'name' => null,
-    ];
-
-    // UUID v5 configuration (namespace-based, SHA1)
-    public array $v5 = [
-        'ns'   => SymfonyUuid::NAMESPACE_URL,
-        'name' => null,
-    ];
+    // ...
 }
 ```
 
@@ -141,7 +131,7 @@ UUIDs are only auto-generated for the primary key field. For other fields, you m
 
 ```php
 $order = [
-    'tracking_id' => service('uuid')->generate('v4')->toRfc4122(),
+    'tracking_id' => service('uuid')->uuid4()->toRfc4122(),
     'customer_id' => 123,
     'total'       => 99.99,
 ];
@@ -189,7 +179,7 @@ CREATE TABLE projects (
 With binary storage:
 - The model returns UUIDs as RFC4122 strings (human-readable)
 - Internally converts to binary for database operations
-- Supports MySQL, PostgreSQL, SQLite, Oracle, and SQL Server
+- Supports MySQL, PostgreSQL, SQLite3, Oracle, and SQL Server
 
 ### UUID Service
 
