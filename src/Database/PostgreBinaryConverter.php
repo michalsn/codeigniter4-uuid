@@ -16,21 +16,14 @@ class PostgreBinaryConverter implements BinaryLiteralConverterInterface
     {
         $hex = bin2hex($binary);
 
-        return new RawSql("'\\\\x{$hex}'");
+        return new RawSql("decode('{$hex}', 'hex')");
     }
 
     public function fromBinaryLiteral(RawSql $literal): string
     {
-        $literal = trim((string) $literal);
+        $literal = (string) $literal;
 
-        // PostgreSQL BYTEA hex format: '\\xDEADBEEF' (SQL literal form)
-        // Actual stored value from SELECT is usually: "\xDEADBEEF"
-        if (preg_match('/^\\\\?x([0-9a-fA-F]+)$/', $literal, $m)) {
-            return hex2bin($m[1]);
-        }
-
-        // Or full SQL literal: '\\xDEADBEEF'
-        if (preg_match("/^'\\\\\\\\x([0-9a-fA-F]+)'$/", $literal, $m)) {
+        if (preg_match("/^decode\\('([0-9a-fA-F]+)',\\s*'hex'\\)$/", $literal, $m)) {
             return hex2bin($m[1]);
         }
 

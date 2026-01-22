@@ -21,7 +21,7 @@ class OCI8BinaryConverter implements BinaryLiteralConverterInterface
 
     public function fromBinaryLiteral(RawSql $literal): string
     {
-        $literal = trim((string) $literal);
+        $literal = (string) $literal;
 
         // Format: HEXTORAW('DEADBEEF')
         if (preg_match("/^HEXTORAW\\('([0-9a-fA-F]+)'\\)$/i", $literal, $m)) {

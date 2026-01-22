@@ -21,7 +21,7 @@ class MySqliBinaryConverter implements BinaryLiteralConverterInterface
 
     public function fromBinaryLiteral(RawSql $literal): string
     {
-        $literal = trim((string) $literal);
+        $literal = (string) $literal;
 
         // Format: 0xDEADBEEF
         if (preg_match('/^0x([0-9a-fA-F]+)$/', $literal, $m)) {

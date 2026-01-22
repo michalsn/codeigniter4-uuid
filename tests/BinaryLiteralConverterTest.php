@@ -111,22 +111,13 @@ final class BinaryLiteralConverterTest extends TestCase
         $converter = new PostgreBinaryConverter();
         $result    = $converter->toBinaryLiteral($this->testBinary);
 
-        $this->assertSame("'\\\\x{$this->testHex}'", (string) $result);
+        $this->assertSame("decode('{$this->testHex}', 'hex')", (string) $result);
     }
 
-    public function testPostgreFromBinaryLiteralSqlForm()
+    public function testPostgreFromBinaryLiteral()
     {
         $converter = new PostgreBinaryConverter();
-        $literal   = new RawSql("'\\\\x{$this->testHex}'");
-        $result    = $converter->fromBinaryLiteral($literal);
-
-        $this->assertSame($this->testBinary, $result);
-    }
-
-    public function testPostgreFromBinaryLiteralSelectForm()
-    {
-        $converter = new PostgreBinaryConverter();
-        $literal   = new RawSql("\\x{$this->testHex}");
+        $literal   = new RawSql("decode('{$this->testHex}', 'hex')");
         $result    = $converter->fromBinaryLiteral($literal);
 
         $this->assertSame($this->testBinary, $result);

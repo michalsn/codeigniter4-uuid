@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Michalsn\CodeIgniterUuid\Models\Cast;
 
+use CodeIgniter\Database\RawSql;
 use CodeIgniter\DataCaster\Cast\BaseCast;
+use Michalsn\CodeIgniterUuid\Database\BinaryLiteralConverterFactory;
 use Michalsn\CodeIgniterUuid\Enums\UuidType;
 use Symfony\Component\Uid\Uuid;
 
@@ -22,6 +24,11 @@ class UuidCast extends BaseCast
                 return $value;
             }
 
+            // PostgreSQL returns BYTEA in hex format: \xDEADBEEF...
+            if (is_string($value) && str_starts_with($value, '\\x')) {
+                $value = hex2bin(substr($value, 2));
+            }
+
             return Uuid::fromBinary($value)->toRfc4122();
         }
 
@@ -32,7 +39,7 @@ class UuidCast extends BaseCast
         mixed $value,
         array $params = [],
         ?object $helper = null,
-    ): ?string {
+    ): RawSql|string|null {
         $type = $params[1] ?? config('Uuid')->defaultType->value;
 
         if ($type === UuidType::BYTES->value) {
@@ -40,7 +47,14 @@ class UuidCast extends BaseCast
                 return $value;
             }
 
-            return Uuid::fromString($value)->toBinary();
+            $binary = Uuid::fromString($value)->toBinary();
+
+            // Use database-specific binary literal format
+            if ($helper !== null && isset($helper->DBDriver)) {
+                return BinaryLiteralConverterFactory::get($helper->DBDriver)->toBinaryLiteral($binary);
+            }
+
+            return $binary;
         }
 
         return $value;

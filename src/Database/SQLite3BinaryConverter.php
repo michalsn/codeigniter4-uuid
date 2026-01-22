@@ -21,7 +21,7 @@ class SQLite3BinaryConverter implements BinaryLiteralConverterInterface
 
     public function fromBinaryLiteral(RawSql $literal): string
     {
-        $literal = trim((string) $literal);
+        $literal = (string) $literal;
 
         // Format: X'DEADBEEF'
         if (preg_match("/^X'([0-9a-fA-F]+)'$/", $literal, $m)) {
