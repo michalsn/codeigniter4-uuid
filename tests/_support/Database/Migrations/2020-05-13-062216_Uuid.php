@@ -3,6 +3,7 @@
 namespace Tests\Support\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
+use CodeIgniter\Exceptions\InvalidArgumentException;
 
 class Uuid extends Migration
 {
@@ -58,10 +59,7 @@ class Uuid extends Migration
 
         // Projects3 table
         $this->forge->addField([
-            'id' => [
-                'type'       => 'BINARY',
-                'constraint' => 16,
-            ],
+            'id'   => $this->setBinaryType($this->db->DBDriver),
             'name' => [
                 'type'       => 'VARCHAR',
                 'constraint' => '50',
@@ -84,12 +82,8 @@ class Uuid extends Migration
                 'constraint'     => 11,
                 'auto_increment' => true,
             ],
-            'category_id' => [
-                'type'       => 'BINARY',
-                'constraint' => 16,
-                'null'       => true,
-            ],
-            'name' => [
+            'category_id' => $this->setBinaryType($this->db->DBDriver),
+            'name'        => [
                 'type'       => 'VARCHAR',
                 'constraint' => '50',
             ],
@@ -111,5 +105,28 @@ class Uuid extends Migration
         $this->forge->dropTable('projects2');
         $this->forge->dropTable('projects3');
         $this->forge->dropTable('projects4');
+    }
+
+    private function setBinaryType(string $driver): array
+    {
+        return match ($driver) {
+            'MySQLi', 'SQLSRV' => [
+                'type'       => 'BINARY',
+                'constraint' => 16,
+            ],
+            'Postgre' => [
+                'type' => 'BYTEA',
+            ],
+            'OCI8' => [
+                'type'       => 'RAW',
+                'constraint' => 16,
+            ],
+            'SQLite3' => [
+                'type' => 'BLOB',
+            ],
+            default => throw new InvalidArgumentException(
+                "Unsupported database driver: {$driver}",
+            ),
+        };
     }
 }
