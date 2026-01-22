@@ -40,6 +40,12 @@ parameters:
 			path: tests/UuidTest.php
 
 		-
+			message: '#^Access to an undefined property CodeIgniter\\Database\\ConnectionInterface\:\:\$DBDriver\.$#'
+			identifier: property.notFound
+			count: 2
+			path: tests/_support/Database/Migrations/2020-05-13-062216_Uuid.php
+
+		-
 			message: '#^Instanceof between int\|string and CodeIgniter\\Database\\RawSql will always evaluate to false\.$#'
 			identifier: instanceof.alwaysFalse
 			count: 1
