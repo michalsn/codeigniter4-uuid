@@ -38,12 +38,12 @@ body:
       required: true
 
   - type: input
-    id: queue-version
+    id: uuid-package-version
     attributes:
-      label: Queue Package Version
+      label: UUID Package Version
       description: |
         e.g. dev:develop, 1.0.0 and ...
-        If you are not using the [latest version](https://github.com/codeigniter4/queue/releases), please
+        If you are not using the [latest version](https://github.com/michalsn/codeigniter4-uuid/releases), please
         check to see if the problem occurs with the latest version.
     validations:
       required: true
@@ -76,21 +76,20 @@ body:
       required: true
 
   - type: input
-    id: queue-driver
+    id: uuid-version
     attributes:
-      label: Queue Driver
+      label: UUID version
       description: |
-        e.g. database, redis, predis
+        e.g. v4, v7, ulid
     validations:
       required: true
 
   - type: textarea
-    id: queue-configuration
+    id: uuid-configuration
     attributes:
-      label: Queue Configuration
+      label: UUID Configuration
       description: |
-        Please provide your queue configuration settings.
-        **Important:** Before sharing, ensure that all sensitive data such as passwords, API keys, and secrets are masked or removed.
+        Please provide your UUID configuration settings.
     validations:
       required: true
 
