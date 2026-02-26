@@ -191,6 +191,25 @@ trait HasUuid
     // Overridden model methods
     //
 
+    protected function shouldUpdate($row): bool
+    {
+        $id = $this->getIdValue($row);
+
+        if (in_array($id, [null, [], ''], true)) {
+            return false;
+        }
+
+        if ($this->useAutoIncrement === true) {
+            return true;
+        }
+
+        if (is_string($id)) {
+            $id = $this->convertUuidPrimaryKey($id);
+        }
+
+        return $this->where($this->primaryKey, $id)->countAllResults() === 1;
+    }
+
     protected function doFirst()
     {
         $builder = $this->builder();

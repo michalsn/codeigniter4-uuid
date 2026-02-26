@@ -366,6 +366,33 @@ final class UuidModelTest extends TestCase
         ]);
     }
 
+    public function testSaveMethodWithUuidPrimaryKeyBytes()
+    {
+        $model = model(Project3Model::class);
+
+        // Insert via save
+        $data = [
+            'name'        => 'Save Test Bytes',
+            'description' => 'Save Description Bytes',
+        ];
+
+        $result = $model->save($data);
+        $this->assertTrue($result);
+
+        // Update via save — this triggers shouldUpdate() with binary PK
+        $projects = $model->findAll();
+        $project  = $projects[0];
+        $id       = $project['id'];
+
+        $project['name'] = 'Updated via Save Bytes';
+        $result          = $model->save($project);
+
+        $this->assertTrue($result);
+
+        $updated = $model->find($id);
+        $this->assertSame('Updated via Save Bytes', $updated['name']);
+    }
+
     public function testFirstMethodReturnsOldestRecord()
     {
         $model = model(Project1Model::class);
