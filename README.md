@@ -227,6 +227,9 @@ $uuid = service('uuid')->fromString('550e8400e29b41d4a716446655440000');
 // From ULID string
 $ulid = service('uuid')->fromString('01ARZ3NDEKTSV4RRFFQ69G5FAV');
 
+// From UUID Base32 encoding
+$uuid = service('uuid')->fromBase32('01JPRHWQCKFB7V1KMWP7PRRSMG');
+
 // From unknown format (string or binary)
 $uuid = service('uuid')->fromValue($unknownValue);
 ```
