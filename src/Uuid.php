@@ -48,6 +48,11 @@ class Uuid
         return new UuidWrapper(SymfonyUuid::fromBinary($value));
     }
 
+    public function fromBase32(string $uuid): UuidWrapper
+    {
+        return new UuidWrapper(SymfonyUuid::fromBase32($uuid));
+    }
+
     public function isValid(string $value): bool
     {
         // Check if it's a valid ULID

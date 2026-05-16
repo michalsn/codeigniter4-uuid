@@ -8,6 +8,7 @@ use Michalsn\CodeIgniterUuid\Config\Uuid as UuidConfig;
 use Michalsn\CodeIgniterUuid\Enums\UuidVersion;
 use Michalsn\CodeIgniterUuid\Exceptions\CodeIgniterUuidException;
 use Michalsn\CodeIgniterUuid\Uuid;
+use Symfony\Component\Uid\Exception\InvalidArgumentException;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Component\Uid\UuidV1;
 use Symfony\Component\Uid\UuidV3;
@@ -214,6 +215,33 @@ final class UuidTest extends TestCase
         $result = $this->uuid->fromValue($uuidString);
 
         $this->assertSame($uuid->toRfc4122(), $result->toRfc4122());
+    }
+
+    public function testFromBase32()
+    {
+        $uuid = $this->uuid->generate('v7');
+
+        $result = $this->uuid->fromBase32($uuid->toBase32());
+
+        $this->assertInstanceOf(UuidV7::class, $result->unwrap());
+        $this->assertSame($uuid->toRfc4122(), $result->toRfc4122());
+    }
+
+    public function testFromBase32WithLowercaseValue()
+    {
+        $uuid = $this->uuid->generate('v7');
+
+        $result = $this->uuid->fromBase32(strtolower($uuid->toBase32()));
+
+        $this->assertInstanceOf(UuidV7::class, $result->unwrap());
+        $this->assertSame($uuid->toRfc4122(), $result->toRfc4122());
+    }
+
+    public function testFromBase32WithInvalidValue()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->uuid->fromBase32('not-a-uuid');
     }
 
     public function testGenerateUlid()
