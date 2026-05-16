@@ -28,10 +28,10 @@ class BinaryLiteralConverterFactory
 
         self::$converters[$driver] = match ($driver) {
             'MySQLi', 'SQLSRV' => new MySqliBinaryConverter(),
-            'Postgre' => new PostgreBinaryConverter(),
-            'SQLite3' => new SQLite3BinaryConverter(),
-            'OCI8'    => new OCI8BinaryConverter(),
-            default   => throw CodeIgniterUuidException::forUnknownDbDriver(),
+            'Postgre'          => new PostgreBinaryConverter(),
+            'SQLite3'          => new SQLite3BinaryConverter(),
+            'OCI8'             => new OCI8BinaryConverter(),
+            default            => throw CodeIgniterUuidException::forUnknownDbDriver(),
         };
 
         return self::$converters[$driver];
